@@ -1,0 +1,231 @@
+@{
+    ViewData["Title"] = "Inventory";
+}
+
+<style>
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .page-header h5 { margin: 0; font-size: 18px; font-weight: 700; color: #1a1a2e; }
+
+    .search-bar { display: flex; gap: 10px; margin-bottom: 18px; }
+    .search-bar input {
+        flex: 1; padding: 8px 14px;
+        border: 1px solid #ddd; border-radius: 8px;
+        font-size: 13px; background: #f9f9fb; outline: none;
+    }
+    .search-bar input:focus { border-color: #4a8dac; }
+
+    .btn-primary-sm {
+        background: #4a8dac; color: #fff; border: none;
+        padding: 8px 20px; border-radius: 8px;
+        font-size: 13px; font-weight: 600;
+        cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary-sm:hover { background: #3a7a98; color: #fff; }
+
+    .inv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .inv-table thead th {
+        background: #f0f4f8; padding: 10px 14px; text-align: left;
+        font-weight: 700; color: #555; border-bottom: 2px solid #e0e6ed;
+    }
+    .inv-table tbody td {
+        padding: 11px 14px; border-bottom: 1px solid #f0f0f0;
+        color: #333; vertical-align: middle;
+    }
+    .inv-table tbody tr:hover { background: #f7fafc; }
+
+    .prod-img {
+        width: 40px; height: 40px; border-radius: 8px;
+        object-fit: cover; background: #eee;
+        display: inline-flex; align-items: center;
+        justify-content: center; font-size: 20px;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Stage progress bar */
+    .stage-track {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    .stage-dot {
+        width: 20px; height: 20px;
+        border-radius: 50%;
+        font-size: 9px;
+        font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff;
+    }
+    .stage-done    { background: #27ae60; }
+    .stage-pending { background: #ddd; color: #999; }
+    .stage-label   { font-size: 11px; color: #888; margin-left: 6px; }
+
+    .pct-text { font-size: 12px; font-weight: 700; margin-left: 6px; }
+    .pct-100 { color: #27ae60; }
+    .pct-75  { color: #f39c12; }
+    .pct-50  { color: #3498db; }
+    .pct-25  { color: #e74c3c; }
+    .pct-0   { color: #aaa; }
+
+    .stock-low  { color: #e74c3c; font-weight: 700; }
+    .stock-ok   { color: #27ae60; font-weight: 700; }
+
+    .action-btn { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; }
+    .btn-edit   { background: #eaf4fb; color: #2980b9; }
+    .btn-delete { background: #fdedec; color: #c0392b; margin-left: 4px; }
+
+    .floating-add {
+        position: fixed; bottom: 36px; right: 36px;
+        background: #4a8dac; color: #fff;
+        width: 50px; height: 50px; border-radius: 50%;
+        font-size: 26px; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 6px 18px rgba(74,141,172,.4);
+        text-decoration: none; transition: transform .2s;
+    }
+    .floating-add:hover { transform: scale(1.1); color: #fff; }
+</style>
+
+<div class="card-box">
+    <div class="page-header">
+        <h5>📦 Inventory</h5>
+        <a href="/Inventory/Create" class="btn-primary-sm">＋ Add Product</a>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="invSearch" placeholder="🔍 Search by product name or ID…" oninput="filterInv()" />
+    </div>
+
+    <table class="inv-table" id="invTable">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Stock</th>
+                <th>Production Stages</th>
+                <th>Complete</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>#P-001</td>
+                <td><div class="prod-img">💍</div></td>
+                <td>Gold Ring</td>
+                <td class="stock-ok">120 pcs</td>
+                <td>
+                    <div class="stage-track">
+                        <div class="stage-dot stage-done" title="Casting">C</div>
+                        <div class="stage-dot stage-done" title="Finishing Touch">F</div>
+                        <div class="stage-dot stage-done" title="Gold Plating">G</div>
+                        <div class="stage-dot stage-done" title="Packaging">P</div>
+                    </div>
+                </td>
+                <td><span class="pct-text pct-100">100% ✔</span></td>
+                <td>
+                    <a href="/Inventory/Edit/1" class="action-btn btn-edit">Edit</a>
+                    <a href="/Inventory/Delete/1" class="action-btn btn-delete" onclick="return confirm('Delete this product?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#P-002</td>
+                <td><div class="prod-img">📿</div></td>
+                <td>Gold Chain</td>
+                <td class="stock-ok">85 pcs</td>
+                <td>
+                    <div class="stage-track">
+                        <div class="stage-dot stage-done" title="Casting">C</div>
+                        <div class="stage-dot stage-done" title="Finishing Touch">F</div>
+                        <div class="stage-dot stage-done" title="Gold Plating">G</div>
+                        <div class="stage-dot stage-pending" title="Packaging">P</div>
+                    </div>
+                </td>
+                <td><span class="pct-text pct-75">75%</span></td>
+                <td>
+                    <a href="/Inventory/Edit/2" class="action-btn btn-edit">Edit</a>
+                    <a href="/Inventory/Delete/2" class="action-btn btn-delete" onclick="return confirm('Delete this product?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#P-003</td>
+                <td><div class="prod-img">💎</div></td>
+                <td>Diamond Necklace</td>
+                <td class="stock-low">12 pcs ⚠</td>
+                <td>
+                    <div class="stage-track">
+                        <div class="stage-dot stage-done" title="Casting">C</div>
+                        <div class="stage-dot stage-done" title="Finishing Touch">F</div>
+                        <div class="stage-dot stage-pending" title="Gold Plating">G</div>
+                        <div class="stage-dot stage-pending" title="Packaging">P</div>
+                    </div>
+                </td>
+                <td><span class="pct-text pct-50">50%</span></td>
+                <td>
+                    <a href="/Inventory/Edit/3" class="action-btn btn-edit">Edit</a>
+                    <a href="/Inventory/Delete/3" class="action-btn btn-delete" onclick="return confirm('Delete this product?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#P-004</td>
+                <td><div class="prod-img">🥇</div></td>
+                <td>Gold Bangle</td>
+                <td class="stock-ok">200 pcs</td>
+                <td>
+                    <div class="stage-track">
+                        <div class="stage-dot stage-done" title="Casting">C</div>
+                        <div class="stage-dot stage-pending" title="Finishing Touch">F</div>
+                        <div class="stage-dot stage-pending" title="Gold Plating">G</div>
+                        <div class="stage-dot stage-pending" title="Packaging">P</div>
+                    </div>
+                </td>
+                <td><span class="pct-text pct-25">25%</span></td>
+                <td>
+                    <a href="/Inventory/Edit/4" class="action-btn btn-edit">Edit</a>
+                    <a href="/Inventory/Delete/4" class="action-btn btn-delete" onclick="return confirm('Delete this product?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>#P-005</td>
+                <td><div class="prod-img">👑</div></td>
+                <td>Silver Earrings</td>
+                <td class="stock-low">8 pcs ⚠</td>
+                <td>
+                    <div class="stage-track">
+                        <div class="stage-dot stage-pending" title="Casting">C</div>
+                        <div class="stage-dot stage-pending" title="Finishing Touch">F</div>
+                        <div class="stage-dot stage-pending" title="Gold Plating">G</div>
+                        <div class="stage-dot stage-pending" title="Packaging">P</div>
+                    </div>
+                </td>
+                <td><span class="pct-text pct-0">0% — Not Started</span></td>
+                <td>
+                    <a href="/Inventory/Edit/5" class="action-btn btn-edit">Edit</a>
+                    <a href="/Inventory/Delete/5" class="action-btn btn-delete" onclick="return confirm('Delete this product?')">Delete</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Legend -->
+    <div style="margin-top:14px;font-size:11px;color:#aaa;display:flex;gap:14px;align-items:center;">
+        <span><span style="display:inline-block;width:12px;height:12px;background:#27ae60;border-radius:50%;margin-right:4px;"></span>Done</span>
+        <span><span style="display:inline-block;width:12px;height:12px;background:#ddd;border-radius:50%;margin-right:4px;"></span>Pending</span>
+        <span>C = Casting &nbsp;|&nbsp; F = Finishing Touch &nbsp;|&nbsp; G = Gold Plating &nbsp;|&nbsp; P = Packaging</span>
+    </div>
+</div>
+
+<a href="/Inventory/Create" class="floating-add" title="Add Product">＋</a>
+
+<script>
+    function filterInv() {
+        const q = document.getElementById('invSearch').value.toLowerCase();
+        document.querySelectorAll('#invTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+</script>

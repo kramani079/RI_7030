@@ -3,48 +3,37 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RI_7030.Controllers
 {
-    public class TransactionController : Controller
+    public class TransactionController : BaseController
     {
-        // GET: TransactionController
-        public ActionResult Index()
+        public ActionResult Index(string tab = "buy")
         {
+            ViewBag.Tab = tab;
             return View();
         }
 
-        // GET: TransactionController/Details/5
         public ActionResult Details(int id)
         {
             return View();
         }
 
-        // GET: TransactionController/Create
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: TransactionController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(IFormCollection collection)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            // TODO: Save to DB — redirect to history tab after submit
+            return RedirectToAction("Index", new { tab = "history" });
         }
 
-        // GET: TransactionController/Edit/5
         public ActionResult Edit(int id)
         {
             return View();
         }
 
-        // POST: TransactionController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, IFormCollection collection)
@@ -59,13 +48,11 @@ namespace RI_7030.Controllers
             }
         }
 
-        // GET: TransactionController/Delete/5
         public ActionResult Delete(int id)
         {
             return View();
         }
 
-        // POST: TransactionController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)

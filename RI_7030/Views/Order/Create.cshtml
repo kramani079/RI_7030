@@ -1,0 +1,161 @@
+@{
+    ViewData["Title"] = "New Order";
+}
+
+<style>
+    .form-card { max-width: 680px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 32px 36px; box-shadow: 0 4px 18px rgba(0,0,0,0.09); }
+    .form-card h5 { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 24px; text-align: center; }
+    .section-label { font-size: 11px; font-weight: 800; color: #aaa; text-transform: uppercase; letter-spacing: .8px; margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 10px 14px; border: 1px solid #dde1e7; border-radius: 8px;
+        font-size: 13px; background: #f9f9fb; color: #333; outline: none;
+        box-sizing: border-box; transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #4a8dac; background: #fff; }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+
+    /* Stage checkboxes */
+    .stage-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 4px; }
+    .stage-box { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 10px; background: #f9f9fb; border: 1.5px solid #e0e6ed; cursor: pointer; font-size: 11px; font-weight: 700; color: #555; text-align: center; transition: all .15s; }
+    .stage-box:has(input:checked) { background: #eafaf1; border-color: #27ae60; color: #1e8449; }
+    .stage-box input[type=checkbox] { width: 16px; height: 16px; accent-color: #27ae60; }
+    .stage-icon { font-size: 20px; }
+
+    /* Total live preview */
+    .total-preview { background: #f0f4f8; border-radius: 10px; padding: 14px 18px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .total-preview .label { font-size: 13px; color: #666; font-weight: 600; }
+    .total-preview .value { font-size: 20px; font-weight: 800; color: #1a1a2e; }
+
+    .form-actions { display: flex; gap: 10px; justify-content: center; margin-top: 24px; }
+    .btn-submit { background: #4a8dac; color: #fff; border: none; padding: 11px 40px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .btn-submit:hover { background: #3a7a98; }
+    .btn-cancel { background: #f0f0f0; color: #555; border: none; padding: 11px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block; }
+
+    @@media(max-width:600px) { .form-row { grid-template-columns:1fr; } .stage-grid { grid-template-columns:repeat(2,1fr); } }
+</style>
+
+<div class="form-card">
+    <h5>📋 New Order</h5>
+
+    <form method="post" action="/Order/Create">
+        @Html.AntiForgeryToken()
+
+        <!-- Customer -->
+        <div class="section-label">👤 Customer Details</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Customer Name *</label>
+                <input type="text" name="CustomerName" placeholder="e.g. Mahesh Patel" required />
+            </div>
+            <div class="form-group">
+                <label>Customer Phone</label>
+                <input type="tel" name="CustomerPhone" placeholder="e.g. +91 98765 43210" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Customer Email</label>
+            <input type="email" name="CustomerEmail" placeholder="e.g. mahesh@gmail.com" />
+        </div>
+
+        <!-- Product -->
+        <div class="section-label">📦 Product Details</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Product *</label>
+                <select name="ProductName" required>
+                    <option value="" disabled selected>Select product…</option>
+                    <option>Gold Ring</option>
+                    <option>Gold Chain</option>
+                    <option>Diamond Necklace</option>
+                    <option>Gold Bangle</option>
+                    <option>Silver Earrings</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity *</label>
+                <input type="number" name="Quantity" id="qty" placeholder="e.g. 50" min="1" required oninput="calcTotal()" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Unit Price (₹) *</label>
+                <input type="number" name="UnitPrice" id="price" placeholder="e.g. 5000" min="0" required oninput="calcTotal()" />
+            </div>
+            <div class="form-group">
+                <label>Due Date *</label>
+                <input type="date" name="DueDate" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            </div>
+        </div>
+
+        <!-- Live total -->
+        <div class="total-preview">
+            <span class="label">Total Amount</span>
+            <span class="value" id="totalAmt">₹0</span>
+        </div>
+
+        <!-- Production Stage -->
+        <div class="section-label">⚙ Production Stage (mark completed stages)</div>
+        <div class="stage-grid">
+            <label class="stage-box">
+                <span class="stage-icon">🔨</span>
+                <input type="checkbox" name="IsCastingDone" value="true" />
+                Stage 1<br/>Casting
+            </label>
+            <label class="stage-box">
+                <span class="stage-icon">✨</span>
+                <input type="checkbox" name="IsFinishingTouchDone" value="true" />
+                Stage 2<br/>Finishing
+            </label>
+            <label class="stage-box">
+                <span class="stage-icon">🥇</span>
+                <input type="checkbox" name="IsGoldPlatingDone" value="true" />
+                Stage 3<br/>Gold Plating
+            </label>
+            <label class="stage-box">
+                <span class="stage-icon">📦</span>
+                <input type="checkbox" name="IsPackagingDone" value="true" />
+                Stage 4<br/>Packaging
+            </label>
+        </div>
+
+        <!-- Status & Notes -->
+        <div class="section-label">📝 Additional Info</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Status</label>
+                <select name="Status">
+                    <option value="Pending">Pending</option>
+                    <option value="InProduction">In Production</option>
+                    <option value="ReadyToDispatch">Ready to Dispatch</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Order Date</label>
+                <input type="date" name="OrderDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Notes (optional)</label>
+            <textarea name="Notes" placeholder="Any special instructions…"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="/Order" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-submit">Place Order</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function calcTotal() {
+        const qty = parseFloat(document.getElementById('qty').value) || 0;
+        const price = parseFloat(document.getElementById('price').value) || 0;
+        const total = qty * price;
+        document.getElementById('totalAmt').textContent = '₹' + total.toLocaleString('en-IN');
+    }
+</script>

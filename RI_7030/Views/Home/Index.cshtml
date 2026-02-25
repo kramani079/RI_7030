@@ -2,21 +2,471 @@
     ViewData["Title"] = "Home";
 }
 
-<h2>Dashboard</h2>
+<style>
+    /* ── Summary Cards ──────────────────────────────── */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
 
-<div class="card-container">
-    <div class="card">
-        <h3>Total Products</h3>
-        <p>120</p>
+    .sum-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+        border-left: 5px solid transparent;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .sum-card .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: #888;
+        font-weight: 600;
+    }
+
+    .sum-card .amount {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .sum-card .sub {
+        font-size: 12px;
+        color: #aaa;
+    }
+
+    .sum-card.receive  { border-color: #27ae60; }
+    .sum-card.pay      { border-color: #e74c3c; }
+    .sum-card.orders   { border-color: #f39c12; }
+    .sum-card.net      { border-color: #3498db; }
+
+    .sum-card.receive  .amount { color: #27ae60; }
+    .sum-card.pay      .amount { color: #e74c3c; }
+    .sum-card.orders   .amount { color: #f39c12; }
+    .sum-card.net      .amount { color: #3498db; }
+
+    /* ── Section Layout ─────────────────────────────── */
+    .pay-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    .pay-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    }
+
+    .pay-section .sec-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .pay-section .sec-header h6 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .sec-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .dot-green { background: #27ae60; }
+    .dot-red   { background: #e74c3c; }
+
+    /* ── Payment Row ────────────────────────────────── */
+    .pay-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .pay-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #f9f9fb;
+        border: 1px solid #eee;
+        transition: box-shadow .15s;
+    }
+
+    .pay-row:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+
+    .pay-row.today-row {
+        background: #fff8e1;
+        border-color: #f39c12;
+    }
+
+    .pay-row.overdue-row {
+        background: #fdecea;
+        border-color: #e74c3c;
+    }
+
+    .pay-row .person {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .pay-row .person strong {
+        font-size: 13px;
+        color: #1a1a2e;
+    }
+
+    .pay-row .person span {
+        font-size: 11px;
+        color: #999;
+    }
+
+    .pay-row .right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+    }
+
+    .pay-row .money {
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .money-in  { color: #27ae60; }
+    .money-out { color: #e74c3c; }
+
+    /* ── Badges ─────────────────────────────────────── */
+    .badge {
+        display: inline-block;
+        padding: 2px 9px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+    }
+
+    .badge-today    { background: #fff3cd; color: #856404; }
+    .badge-overdue  { background: #f8d7da; color: #842029; }
+    .badge-upcoming { background: #e8f4fd; color: #0c5460; }
+    .badge-paid     { background: #d1f5e0; color: #155724; }
+
+    /* ── Day Divider ────────────────────────────────── */
+    .day-divider {
+        font-size: 11px;
+        font-weight: 700;
+        color: #bbb;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        margin: 8px 0 4px;
+    }
+
+    /* ── Pending Orders ─────────────────────────────── */
+    .orders-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    }
+
+    .orders-section h6 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 14px;
+    }
+
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .order-table thead th {
+        background: #f4f6fb;
+        padding: 9px 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+        border-bottom: 1px solid #eee;
+    }
+
+    .order-table tbody td {
+        padding: 9px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #333;
+    }
+
+    .order-table tbody tr:last-child td { border-bottom: none; }
+
+    .prog-bar-bg {
+        background: #eee;
+        border-radius: 20px;
+        height: 8px;
+        width: 100px;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .prog-bar-fill {
+        height: 100%;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #3498db, #27ae60);
+    }
+
+    @@media (max-width: 900px) {
+        .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        .pay-grid      { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- Summary Cards -->
+<div class="summary-grid">
+    <a href="/Transaction?tab=history" class="sum-card receive" style="text-decoration:none;cursor:pointer;">
+        <div class="label">To Receive (Receivable)</div>
+        <div class="amount">₹1,85,000</div>
+        <div class="sub">6 pending payments →</div>
+    </a>
+    <a href="/Transaction?tab=history" class="sum-card pay" style="text-decoration:none;cursor:pointer;">
+        <div class="label">To Pay (Payable)</div>
+        <div class="amount">₹72,500</div>
+        <div class="sub">4 pending payments →</div>
+    </a>
+    <a href="/Inventory" class="sum-card orders" style="text-decoration:none;cursor:pointer;">
+        <div class="label">Pending Orders</div>
+        <div class="amount">8</div>
+        <div class="sub">3 due this week →</div>
+    </a>
+    <a href="/Transaction?tab=history" class="sum-card net" style="text-decoration:none;cursor:pointer;">
+        <div class="label">Net Balance</div>
+        <div class="amount">₹1,12,500</div>
+        <div class="sub">Receivable – Payable →</div>
+    </a>
+</div>
+
+<!-- Payments to Receive / Payments to Make -->
+<div class="pay-grid">
+
+    <!-- Money Coming IN -->
+    <div class="pay-section">
+        <div class="sec-header">
+            <div class="sec-dot dot-green"></div>
+            <h6>💰 Payments to Receive</h6>
+        </div>
+        <div class="pay-list">
+
+            <div class="day-divider">⚠ Overdue</div>
+            <div class="pay-row overdue-row">
+                <div class="person">
+                    <strong>Mahesh Patel</strong>
+                    <span>Gold chain order – Invoice #1021</span>
+                </div>
+                <div class="right">
+                    <span class="money money-in">+ ₹50,000</span>
+                    <span class="badge badge-overdue">Overdue – Feb 20</span>
+                </div>
+            </div>
+            <div class="pay-row overdue-row">
+                <div class="person">
+                    <strong>Suresh Traders</strong>
+                    <span>Bangles batch – Invoice #1018</span>
+                </div>
+                <div class="right">
+                    <span class="money money-in">+ ₹28,000</span>
+                    <span class="badge badge-overdue">Overdue – Feb 22</span>
+                </div>
+            </div>
+
+            <div class="day-divider">📅 Today – Feb 25</div>
+            <div class="pay-row today-row">
+                <div class="person">
+                    <strong>Ramesh Jewellers</strong>
+                    <span>Ring set – Invoice #1025</span>
+                </div>
+                <div class="right">
+                    <span class="money money-in">+ ₹35,000</span>
+                    <span class="badge badge-today">Due Today</span>
+                </div>
+            </div>
+
+            <div class="day-divider">📆 Upcoming</div>
+            <div class="pay-row">
+                <div class="person">
+                    <strong>Vijay Exports</strong>
+                    <span>Necklace order – Invoice #1027</span>
+                </div>
+                <div class="right">
+                    <span class="money money-in">+ ₹42,000</span>
+                    <span class="badge badge-upcoming">Feb 27</span>
+                </div>
+            </div>
+            <div class="pay-row">
+                <div class="person">
+                    <strong>Anita Stores</strong>
+                    <span>Earrings bulk – Invoice #1028</span>
+                </div>
+                <div class="right">
+                    <span class="money money-in">+ ₹18,500</span>
+                    <span class="badge badge-upcoming">Mar 1</span>
+                </div>
+            </div>
+            <div class="pay-row">
+                <div class="person">
+                    <strong>Kishan Bros.</strong>
+                    <span>Bracelet batch – Invoice #1030</span>
+                </div>
+                <div class="right">
+                    <span class="money money-in">+ ₹11,500</span>
+                    <span class="badge badge-paid">Paid ✔</span>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Total Employees</h3>
-        <p>15</p>
+    <!-- Money Going OUT -->
+    <div class="pay-section">
+        <div class="sec-header">
+            <div class="sec-dot dot-red"></div>
+            <h6>💸 Payments to Make</h6>
+        </div>
+        <div class="pay-list">
+
+            <div class="day-divider">⚠ Overdue</div>
+            <div class="pay-row overdue-row">
+                <div class="person">
+                    <strong>Nikhil Supplier</strong>
+                    <span>Raw gold material – Bill #B-204</span>
+                </div>
+                <div class="right">
+                    <span class="money money-out">− ₹22,500</span>
+                    <span class="badge badge-overdue">Overdue – Feb 21</span>
+                </div>
+            </div>
+
+            <div class="day-divider">📅 Today – Feb 25</div>
+            <div class="pay-row today-row">
+                <div class="person">
+                    <strong>Rajan Chemicals</strong>
+                    <span>Plating chemicals – Bill #B-209</span>
+                </div>
+                <div class="right">
+                    <span class="money money-out">− ₹10,000</span>
+                    <span class="badge badge-today">Due Today</span>
+                </div>
+            </div>
+
+            <div class="day-divider">📆 Upcoming</div>
+            <div class="pay-row">
+                <div class="person">
+                    <strong>Praveen Metals</strong>
+                    <span>Silver wire stock – Bill #B-212</span>
+                </div>
+                <div class="right">
+                    <span class="money money-out">− ₹25,000</span>
+                    <span class="badge badge-upcoming">Feb 28</span>
+                </div>
+            </div>
+            <div class="pay-row">
+                <div class="person">
+                    <strong>Logistics Co.</strong>
+                    <span>Freight charges – Bill #B-215</span>
+                </div>
+                <div class="right">
+                    <span class="money money-out">− ₹15,000</span>
+                    <span class="badge badge-upcoming">Mar 3</span>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Total Sales</h3>
-        <p>₹50,000</p>
+</div>
+
+<!-- Pending Orders with Progress -->
+<div class="orders-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h6 style="margin:0;">📦 Pending Orders – Production Status</h6>
+        <a href="/Order" style="font-size:12px;color:#4a8dac;font-weight:600;text-decoration:none;">View All Orders →</a>
     </div>
+    <table class="order-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Due Date</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="cursor:pointer;" onclick="location.href='/Inventory'">
+                <td>#ORD-101</td>
+                <td>Mahesh Patel</td>
+                <td>Gold Chain</td>
+                <td>50</td>
+                <td>Feb 28</td>
+                <td>
+                    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:75%"></div></div>
+                    <small style="color:#555;font-size:11px"> 75%</small>
+                </td>
+                <td><span class="badge badge-today">Gold Plating</span></td>
+                <td><a href="/Transaction?tab=sell" style="font-size:11px;color:#4a8dac;font-weight:600;text-decoration:none;">Sell →</a></td>
+            </tr>
+            <tr style="cursor:pointer;" onclick="location.href='/Inventory'">
+                <td>#ORD-102</td>
+                <td>Ramesh Jewellers</td>
+                <td>Ring Set</td>
+                <td>30</td>
+                <td>Mar 2</td>
+                <td>
+                    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:50%"></div></div>
+                    <small style="color:#555;font-size:11px"> 50%</small>
+                </td>
+                <td><span class="badge badge-upcoming">Finishing</span></td>
+                <td><a href="/Transaction?tab=sell" style="font-size:11px;color:#4a8dac;font-weight:600;text-decoration:none;">Sell →</a></td>
+            </tr>
+            <tr style="cursor:pointer;" onclick="location.href='/Inventory'">
+                <td>#ORD-103</td>
+                <td>Vijay Exports</td>
+                <td>Necklace</td>
+                <td>20</td>
+                <td>Mar 5</td>
+                <td>
+                    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:25%"></div></div>
+                    <small style="color:#555;font-size:11px"> 25%</small>
+                </td>
+                <td><span class="badge badge-upcoming">Casting</span></td>
+                <td><a href="/Transaction?tab=sell" style="font-size:11px;color:#4a8dac;font-weight:600;text-decoration:none;">Sell →</a></td>
+            </tr>
+            <tr style="cursor:pointer;" onclick="location.href='/Inventory'">
+                <td>#ORD-104</td>
+                <td>Anita Stores</td>
+                <td>Earrings</td>
+                <td>100</td>
+                <td>Mar 7</td>
+                <td>
+                    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:100%"></div></div>
+                    <small style="color:#555;font-size:11px"> 100%</small>
+                </td>
+                <td><span class="badge badge-paid">Ready ✔</span></td>
+                <td><a href="/Transaction?tab=sell" style="font-size:11px;color:#27ae60;font-weight:600;text-decoration:none;">Sell →</a></td>
+            </tr>
+        </tbody>
+    </table>
 </div>

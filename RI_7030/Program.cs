@@ -4,8 +4,14 @@ using RI_7030.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔹 Add Database Context
+// 🔹 Add Identity Database Context (for Login/Users)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ));
+
+// 🔹 Add App Database Context (Employee, Product, Transaction)
+builder.Services.AddDbContext<RI_7030DbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
@@ -21,6 +27,15 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 // 🔹 Add MVC
 builder.Services.AddControllersWithViews();
 
+// 🔹 Add Session
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // 🔹 Create Roles Automatically
@@ -32,8 +47,8 @@ using (var scope = app.Services.CreateScope())
 
     foreach (var role in roles)
     {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
+  //      if (!await roleManager.RoleExistsAsync(role))
+    //        await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
 
@@ -45,8 +60,8 @@ using (var scope = app.Services.CreateScope())
 
     foreach (var role in roles)
     {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
+      //  if (!await roleManager.RoleExistsAsync(role))
+      ////      await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
 
@@ -59,6 +74,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseSession();
 
 app.UseRouting();
 
@@ -67,4 +83,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Login}/{action=Index}/{id?}");
+
+
+app.Run();

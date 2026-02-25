@@ -4,7 +4,7 @@ using RI_7030.Models;
 
 namespace RI_7030.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         public IActionResult Index()
         {

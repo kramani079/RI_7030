@@ -1,0 +1,242 @@
+@{
+    ViewData["Title"] = "Employees";
+}
+
+<style>
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .page-header h5 { margin: 0; font-size: 18px; font-weight: 700; color: #1a1a2e; }
+
+    .search-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .search-bar input {
+        flex: 1;
+        padding: 8px 14px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 13px;
+        background: #f9f9fb;
+        outline: none;
+    }
+    .search-bar input:focus { border-color: #4a8dac; }
+
+    .btn-primary-sm {
+        background: #4a8dac;
+        color: #fff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-primary-sm:hover { background: #3a7a98; color: #fff; }
+
+    .emp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .emp-table thead th {
+        background: #f0f4f8;
+        padding: 10px 14px;
+        text-align: left;
+        font-weight: 700;
+        color: #555;
+        border-bottom: 2px solid #e0e6ed;
+    }
+    .emp-table tbody td {
+        padding: 11px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #333;
+        vertical-align: middle;
+    }
+    .emp-table tbody tr:hover { background: #f7fafc; }
+
+    .avatar-circle {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 13px; color: #fff;
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 3px 11px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .type-casting    { background: #e8f4fd; color: #2980b9; }
+    .type-finishing  { background: #eafaf1; color: #1e8449; }
+    .type-plating    { background: #fef9e7; color: #b7950b; }
+    .type-packaging  { background: #f4ecf7; color: #7d3c98; }
+
+    .action-btn {
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .btn-edit   { background: #eaf4fb; color: #2980b9; }
+    .btn-delete { background: #fdedec; color: #c0392b; margin-left: 4px; }
+
+    .floating-add {
+        position: fixed;
+        bottom: 36px;
+        right: 36px;
+        background: #4a8dac;
+        color: #fff;
+        width: 50px; height: 50px;
+        border-radius: 50%;
+        font-size: 26px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 6px 18px rgba(74,141,172,.4);
+        text-decoration: none;
+        transition: transform .2s;
+    }
+    .floating-add:hover { transform: scale(1.1); color: #fff; }
+</style>
+
+<div class="card-box">
+    <div class="page-header">
+        <h5>👥 Employees</h5>
+        <a href="/Employee/Create" class="btn-primary-sm">＋ Add Employee</a>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="empSearch" placeholder="🔍 Search by name, email or type…" oninput="filterTable()" />
+    </div>
+
+    <table class="emp-table" id="empTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Employee</th>
+                <th>Email ID</th>
+                <th>Type</th>
+                <th>Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="avatar-circle" style="background:#4a8dac;">RK</div>
+                        <span>Rajesh Kumar</span>
+                    </div>
+                </td>
+                <td>rajesh.kumar@ri.com</td>
+                <td><span class="type-badge type-casting">Casting</span></td>
+                <td>₹22,000</td>
+                <td>
+                    <a href="/Employee/Edit/1" class="action-btn btn-edit">Edit</a>
+                    <a href="/Employee/Delete/1" class="action-btn btn-delete" onclick="return confirm('Delete Rajesh Kumar?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="avatar-circle" style="background:#27ae60;">PS</div>
+                        <span>Priya Shah</span>
+                    </div>
+                </td>
+                <td>priya.shah@ri.com</td>
+                <td><span class="type-badge type-finishing">Finishing Touch</span></td>
+                <td>₹20,000</td>
+                <td>
+                    <a href="/Employee/Edit/2" class="action-btn btn-edit">Edit</a>
+                    <a href="/Employee/Delete/2" class="action-btn btn-delete" onclick="return confirm('Delete Priya Shah?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="avatar-circle" style="background:#f39c12;">AM</div>
+                        <span>Anil Mehta</span>
+                    </div>
+                </td>
+                <td>anil.mehta@ri.com</td>
+                <td><span class="type-badge type-plating">Gold Plating</span></td>
+                <td>₹25,000</td>
+                <td>
+                    <a href="/Employee/Edit/3" class="action-btn btn-edit">Edit</a>
+                    <a href="/Employee/Delete/3" class="action-btn btn-delete" onclick="return confirm('Delete Anil Mehta?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="avatar-circle" style="background:#9b59b6;">SV</div>
+                        <span>Sunita Verma</span>
+                    </div>
+                </td>
+                <td>sunita.verma@ri.com</td>
+                <td><span class="type-badge type-packaging">Packaging</span></td>
+                <td>₹18,000</td>
+                <td>
+                    <a href="/Employee/Edit/4" class="action-btn btn-edit">Edit</a>
+                    <a href="/Employee/Delete/4" class="action-btn btn-delete" onclick="return confirm('Delete Sunita Verma?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="avatar-circle" style="background:#4a8dac;">MJ</div>
+                        <span>Mukesh Joshi</span>
+                    </div>
+                </td>
+                <td>mukesh.joshi@ri.com</td>
+                <td><span class="type-badge type-casting">Casting</span></td>
+                <td>₹23,000</td>
+                <td>
+                    <a href="/Employee/Edit/5" class="action-btn btn-edit">Edit</a>
+                    <a href="/Employee/Delete/5" class="action-btn btn-delete" onclick="return confirm('Delete Mukesh Joshi?')">Delete</a>
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="avatar-circle" style="background:#27ae60;">ND</div>
+                        <span>Neha Desai</span>
+                    </div>
+                </td>
+                <td>neha.desai@ri.com</td>
+                <td><span class="type-badge type-finishing">Finishing Touch</span></td>
+                <td>₹19,500</td>
+                <td>
+                    <a href="/Employee/Edit/6" class="action-btn btn-edit">Edit</a>
+                    <a href="/Employee/Delete/6" class="action-btn btn-delete" onclick="return confirm('Delete Neha Desai?')">Delete</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<a href="/Employee/Create" class="floating-add" title="Add Employee">＋</a>
+
+<script>
+    function filterTable() {
+        const q = document.getElementById('empSearch').value.toLowerCase();
+        document.querySelectorAll('#empTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+</script>

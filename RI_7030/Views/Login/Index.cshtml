@@ -262,12 +262,19 @@
                     <h2>Login</h2>
                 </div>
 
+                @if (TempData["RegisterSuccess"] != null)
+                {
+                    <div style="background:#d1f5e0;color:#155724;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:600;">
+                        ✔ @TempData["RegisterSuccess"]
+                    </div>
+                }
+
                 @if (ViewBag.ErrorMessage != null)
                 {
                     <div class="error-message">@ViewBag.ErrorMessage</div>
                 }
 
-                <form asp-action="Index" asp-controller="Account" method="post">
+                <form asp-action="Index" asp-controller="Login" method="post">
                     <div class="form-group">
                         <label for="email">Email ID</label>
                         <input type="email" id="email" name="email" class="form-control" placeholder="Email ID" />
@@ -283,7 +290,7 @@
 
                 <div class="login-footer">
                     New user?
-                    <a href="#">Register</a>
+                    <a asp-controller="Login" asp-action="Register">Register</a>
                 </div>
             </div>
         </div>

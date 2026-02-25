@@ -5,13 +5,17 @@ namespace RI_7030.Controllers
 {
     public class LoginController : Controller
     {
-        // GET: /Account
+        // GET: /Login  → Show login form
         public ActionResult Index()
         {
+            // If already logged in, go straight to Home
+            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("IsLoggedIn")))
+                return RedirectToAction("Index", "Home");
+
             return View();
         }
 
-        // POST: /Account
+        // POST: /Login  → Handle login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Index(string email, string password)
@@ -22,78 +26,79 @@ namespace RI_7030.Controllers
                 return View();
             }
 
-            // TODO: Replace with real authentication in Stage 3 (database).
-            // For now, treat any non-empty credentials as a successful login.
-            return RedirectToAction("Index", "Home");
+            // ── Static credentials (replace with DB lookup later) ────────────
+            // Admin login
+            if (email == "admin@ri.com" && password == "admin123")
+            {
+                HttpContext.Session.SetString("IsLoggedIn", "true");
+                HttpContext.Session.SetString("Role",       "Admin");
+                HttpContext.Session.SetString("Name",       "Admin User");
+                HttpContext.Session.SetString("Email",      email);
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Employee login (any employee — static example)
+            if (email == "rajesh.kumar@ri.com" && password == "emp123")
+            {
+                HttpContext.Session.SetString("IsLoggedIn", "true");
+                HttpContext.Session.SetString("Role",       "Employee");
+                HttpContext.Session.SetString("Name",       "Rajesh Kumar");
+                HttpContext.Session.SetString("Email",      email);
+                HttpContext.Session.SetString("EmpType",    "Gold Plating");
+                HttpContext.Session.SetString("EmpId",      "EMP-003");
+                HttpContext.Session.SetString("Phone",      "+91 98765 43210");
+                HttpContext.Session.SetString("Salary",     "₹25,000 / month");
+                HttpContext.Session.SetString("Joining",    "12 Jan 2024");
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewBag.ErrorMessage = "Invalid email or password. Please try again.";
+            return View();
         }
 
-        // GET: Account/Details/5
-        public ActionResult Details(int id)
+        // GET: /Login/Logout
+        public ActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Login");
+        }
+
+        // GET: /Login/Register
+        public IActionResult Register()
         {
             return View();
         }
 
-        // GET: Account/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Account/Create
+        // POST: /Login/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public IActionResult Register(string fullName, string email, string password,
+                                      string confirmPassword, string accountType, string employeeType)
         {
-            try
+            // Basic validation
+            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
+                ViewBag.ErrorMessage = "Please fill in all required fields.";
                 return View();
             }
-        }
 
-        // GET: Account/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Account/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
+            if (password != confirmPassword)
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
+                ViewBag.ErrorMessage = "Passwords do not match. Please try again.";
                 return View();
             }
-        }
 
-        // GET: Account/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Account/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
+            if (string.IsNullOrWhiteSpace(accountType))
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
+                ViewBag.ErrorMessage = "Please select an account type (Admin or Employee).";
                 return View();
             }
+
+            // TODO: Save user to database in Stage 3.
+            // For now, redirect to Login with a success message.
+            TempData["RegisterSuccess"] = $"Registration successful! Welcome, {fullName}. Please log in.";
+            return RedirectToAction("Index", "Login");
         }
     }
 }

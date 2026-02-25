@@ -1,0 +1,230 @@
+﻿@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Register - RI</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background-color: #e6e6e6;
+        }
+
+        /* Top Header */
+        .top-bar {
+            height: 60px;
+            background-color: #4a8dac;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 28px;
+            background: #ffffff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #4a8dac;
+        }
+
+        /* Page Background */
+        .page-wrapper {
+            background-color: #eef4f8;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        /* Register Card */
+        .register-card {
+            background: #ffffff;
+            width: 650px;
+            max-width: 95%;
+            border-radius: 10px;
+            padding: 40px 60px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        }
+
+            .register-card h2 {
+                text-align: center;
+                margin-bottom: 30px;
+                color: #333;
+            }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 25px 0;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: none;
+            background: #f2f2f2;
+            font-size: 14px;
+        }
+
+            .form-control:focus {
+                outline: none;
+                background: #ffffff;
+                border: 1px solid #4a8dac;
+            }
+
+        .radio-group {
+            margin-top: 10px;
+        }
+
+            .radio-group label {
+                margin-right: 20px;
+                font-weight: 500;
+            }
+
+        .btn-register {
+            width: 220px;
+            display: block;
+            margin: 30px auto 0;
+            padding: 10px;
+            border-radius: 25px;
+            border: none;
+            background-color: #4a8dac;
+            color: #ffffff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+            .btn-register:hover {
+                background-color: #3a7893;
+            }
+
+        @@media (max-width: 768px) {
+            .register-card {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Blue Bar -->
+    <div class="top-bar">
+        <div class="logo">RI</div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-wrapper">
+        <div class="register-card">
+
+            <h2>Register</h2>
+            <hr />
+
+            <form method="post" asp-action="Register" asp-controller="Login">
+                @Html.AntiForgeryToken()
+
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div style="background:#fdecea;color:#c0392b;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">
+                        ⚠ @ViewBag.ErrorMessage
+                    </div>
+                }
+
+                <!-- Account Section -->
+                <div class="section-title">Account</div>
+
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Full Name *" name="fullName" required />
+                </div>
+
+                <div class="form-group">
+                    <input type="email" class="form-control" placeholder="Email ID *" name="email" required />
+                </div>
+
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="Password *" name="password" required />
+                </div>
+
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="Confirm Password *" name="confirmPassword" required />
+                </div>
+
+                <!-- Account Type -->
+                <div class="form-group">
+                    <div class="section-title">Account Type</div>
+
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="accountType" value="Admin" onclick="toggleEmployeeType()"> Admin
+                        </label>
+
+                        <label>
+                            <input type="radio" name="accountType" value="Employee" onclick="toggleEmployeeType()"> Employee
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Employee Type (Hidden initially) -->
+                <div class="form-group" id="employeeTypeSection" style="display:none;">
+                    <div class="section-title">Employee Type</div>
+
+                    <select name="employeeType" class="form-control">
+                        <option value="">Select Employee Type</option>
+                        <option value="Casting">1 – Casting</option>
+                        <option value="Finishing Touch">2 – Finishing Touch</option>
+                        <option value="Gold Plating">3 – Gold Plating</option>
+                        <option value="Packaging">4 – Packaging</option>
+                    </select>
+                </div>
+
+                <hr />
+
+                <button type="submit" class="btn-register">Register</button>
+
+                <p style="text-align:center;margin-top:18px;font-size:13px;color:#777;">
+                    Already have an account? <a href="/Login" style="color:#4a8dac;font-weight:600;">Login here</a>
+                </p>
+
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        function toggleEmployeeType() {
+            const employeeSelected = document.querySelector('input[name="AccountType"][value="Employee"]').checked;
+            const employeeSection = document.getElementById("employeeTypeSection");
+
+            if (employeeSelected) {
+                employeeSection.style.display = "block";
+            } else {
+                employeeSection.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>

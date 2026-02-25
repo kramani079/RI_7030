@@ -1,22 +1,322 @@
 @{
     ViewData["Title"] = "Profile";
+
+    // Static placeholder — replace with real values from DB/session later
+    // "Employee" or "Admin"
+    var role        = ViewBag.Role        as string ?? "Employee";
+    var name        = ViewBag.Name        as string ?? "Rajesh Kumar";
+    var email       = ViewBag.Email       as string ?? "rajesh.kumar@ri.com";
+    var phone       = ViewBag.Phone       as string ?? "+91 98765 43210";
+    var empType     = ViewBag.EmpType     as string ?? "Gold Plating";
+    var empId       = ViewBag.EmpId       as string ?? "EMP-003";
+    var salary      = ViewBag.Salary      as string ?? "₹25,000 / month";
+    var joining     = ViewBag.Joining     as string ?? "12 Jan 2024";
+    var department  = ViewBag.Department  as string ?? "Production";
+
+    // Initials for avatar
+    var initials = string.Join("", name.Split(' ').Select(w => w[0])).ToUpper();
+
+    // Type badge colour
+    var typeColor = empType switch {
+        "Casting"        => "#2980b9",
+        "Finishing Touch"=> "#1e8449",
+        "Gold Plating"   => "#b7950b",
+        "Packaging"      => "#7d3c98",
+        _                => "#555"
+    };
+    var typeBg = empType switch {
+        "Casting"        => "#e8f4fd",
+        "Finishing Touch"=> "#eafaf1",
+        "Gold Plating"   => "#fef9e7",
+        "Packaging"      => "#f4ecf7",
+        _                => "#eee"
+    };
 }
 
-<h2 style="margin-bottom: 1rem;">Profile</h2>
+<style>
+    .profile-wrapper {
+        max-width: 700px;
+        margin: 0 auto;
+    }
 
-<div class="card" style="padding: 1.5rem; max-width: 480px;">
-    <h4 style="margin-bottom: 1rem;">User Information</h4>
+    /* ── Header card ───────────────────────────────── */
+    .prof-header-card {
+        background: linear-gradient(135deg, #4a8dac 0%, #2c6e8a 100%);
+        border-radius: 16px;
+        padding: 32px 36px;
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 20px rgba(74,141,172,.3);
+        position: relative;
+    }
 
-    <div class="mb-2">
-        <strong>Name:</strong> Demo User
-    </div>
-    <div class="mb-2">
-        <strong>Email:</strong> demo@example.com
-    </div>
-    <div class="mb-2">
-        <strong>Role:</strong> Admin
+    .prof-avatar {
+        width: 82px; height: 82px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.25);
+        border: 3px solid rgba(255,255,255,.6);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px; font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+        letter-spacing: 1px;
+    }
+
+    .prof-header-info { flex: 1; }
+
+    .prof-header-info h4 {
+        color: #fff;
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0 0 5px;
+    }
+
+    .prof-header-info .sub-email {
+        color: rgba(255,255,255,.8);
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .role-pill {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .4px;
+    }
+
+    .role-admin    { background: #fff; color: #2c6e8a; }
+    .role-employee { background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.5); }
+
+    .edit-btn {
+        position: absolute;
+        top: 20px; right: 24px;
+        background: rgba(255,255,255,.18);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,.4);
+        padding: 7px 18px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background .2s;
+    }
+    .edit-btn:hover { background: rgba(255,255,255,.3); color: #fff; }
+
+    /* ── Detail card ───────────────────────────────── */
+    .detail-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 26px 30px;
+        box-shadow: 0 4px 14px rgba(0,0,0,.07);
+        margin-bottom: 18px;
+    }
+
+    .detail-card .sec-title {
+        font-size: 12px;
+        font-weight: 800;
+        color: #aaa;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 14px;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+
+    .detail-row .label {
+        color: #888;
+        font-weight: 600;
+        font-size: 13px;
+        min-width: 150px;
+    }
+
+    .detail-row .value {
+        color: #1a1a2e;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .type-pill {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* ── Assigned stages ───────────────────────────── */
+    .stage-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .stage-box {
+        border-radius: 10px;
+        padding: 12px 8px;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .stage-active {
+        background: #eafaf1;
+        color: #1e8449;
+        border: 1.5px solid #27ae60;
+    }
+
+    .stage-inactive {
+        background: #f5f5f5;
+        color: #bbb;
+        border: 1.5px solid #e8e8e8;
+    }
+
+    .stage-box .s-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+</style>
+
+<div class="profile-wrapper">
+
+    <!-- Header -->
+    <div class="prof-header-card">
+        <div class="prof-avatar">@initials</div>
+        <div class="prof-header-info">
+            <h4>@name</h4>
+            <div class="sub-email">✉ @email</div>
+            @if (role == "Admin")
+            {
+                <span class="role-pill role-admin">⚙ Admin</span>
+            }
+            else
+            {
+                <span class="role-pill role-employee">👷 Employee — @empType</span>
+            }
+        </div>
+        <a href="#" class="edit-btn">✏ Edit</a>
     </div>
 
-    <button class="btn btn-primary" style="margin-top: 1rem;">Edit Profile</button>
+    @if (role == "Admin")
+    {
+        <!-- Admin Info -->
+        <div class="detail-card">
+            <div class="sec-title">Admin Information</div>
+            <div class="detail-row">
+                <span class="label">Full Name</span>
+                <span class="value">@name</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Email ID</span>
+                <span class="value">@email</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Mobile No.</span>
+                <span class="value">@phone</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Role</span>
+                <span class="value"><span style="background:#e8f4fd;color:#2980b9;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;">Administrator</span></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Department</span>
+                <span class="value">Management</span>
+            </div>
+        </div>
+
+        <!-- Access summary for admin -->
+        <div class="detail-card">
+            <div class="sec-title">Access & Permissions</div>
+            <div class="detail-row">
+                <span class="label">Employees</span>
+                <span class="value" style="color:#27ae60;">✔ Full Access</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Inventory</span>
+                <span class="value" style="color:#27ae60;">✔ Full Access</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Transactions</span>
+                <span class="value" style="color:#27ae60;">✔ Full Access</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Employee Info -->
+        <div class="detail-card">
+            <div class="sec-title">Employee Information</div>
+            <div class="detail-row">
+                <span class="label">Employee ID</span>
+                <span class="value">@empId</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Full Name</span>
+                <span class="value">@name</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Email ID</span>
+                <span class="value">@email</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Mobile No.</span>
+                <span class="value">@phone</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Type of Employee</span>
+                <span class="value">
+                    <span class="type-pill" style="background:@typeBg;color:@typeColor;">@empType</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Department</span>
+                <span class="value">@department</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Salary</span>
+                <span class="value">@salary</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Date of Joining</span>
+                <span class="value">@joining</span>
+            </div>
+        </div>
+
+        <!-- Production stage responsibility -->
+        <div class="detail-card">
+            <div class="sec-title">Production Stage Responsibility</div>
+            <div class="stage-grid">
+                <div class="stage-box @(empType == "Casting" ? "stage-active" : "stage-inactive")">
+                    <span class="s-icon">🔨</span>
+                    Stage 1<br />Casting
+                </div>
+                <div class="stage-box @(empType == "Finishing Touch" ? "stage-active" : "stage-inactive")">
+                    <span class="s-icon">✨</span>
+                    Stage 2<br />Finishing
+                </div>
+                <div class="stage-box @(empType == "Gold Plating" ? "stage-active" : "stage-inactive")">
+                    <span class="s-icon">🥇</span>
+                    Stage 3<br />Gold Plating
+                </div>
+                <div class="stage-box @(empType == "Packaging" ? "stage-active" : "stage-inactive")">
+                    <span class="s-icon">📦</span>
+                    Stage 4<br />Packaging
+                </div>
+            </div>
+        </div>
+    }
+
 </div>
-
