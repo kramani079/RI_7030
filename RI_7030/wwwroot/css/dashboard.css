@@ -1,0 +1,198 @@
+﻿body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #edf2f6;
+}
+
+/* Layout */
+.dashboard {
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 230px;
+    background: #f5f7fa;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.brand {
+    background: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+    .sidebar ul li {
+        margin: 15px 0;
+    }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #444;
+        }
+
+/* Main */
+.main-content {
+    flex: 1;
+}
+
+/* Topbar */
+.topbar {
+    height: 60px;
+    background: #4a8dac;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 25px;
+    color: white;
+}
+
+/* Page */
+.page-container {
+    padding: 30px;
+}
+
+/* Cards */
+.card-box {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    table th {
+        background: #f0f3f6;
+        padding: 12px;
+    }
+
+    table td {
+        padding: 12px;
+        border-top: 1px solid #eee;
+    }
+/* Profile Page */
+.profile-card {
+    padding: 30px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.profile-img img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+}
+
+.profile-info {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.email {
+    color: #777;
+}
+
+.profile-edit {
+    text-align: right;
+}
+
+/* Details Section */
+.profile-details {
+    margin-top: 20px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+    .detail-row label {
+        font-weight: 600;
+        color: #555;
+    }
+
+/* Role Badge */
+.badge-role {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+    .badge-role.admin {
+        background-color: #4a8dac;
+        color: white;
+    }
+
+    .badge-role.user {
+        background-color: #28a745;
+        color: white;
+    }
+
+/* Status */
+.status.active {
+    color: green;
+    font-weight: bold;
+}
+/* Floating Add Button */
+.floating-btn {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4a8dac;
+    color: white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Tabs */
+.tabs a {
+    margin-right: 20px;
+    text-decoration: none;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Forms */
+.form-box input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 6px;
+}
+
+.primary-btn {
+    background: #4a8dac;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 20px;
+}
