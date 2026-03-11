@@ -7,7 +7,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
     }
     .page-header h5 { margin: 0; font-size: 18px; font-weight: 700; color: #1a1a2e; }
 
@@ -18,50 +18,60 @@
     }
     .search-bar input {
         flex: 1;
-        padding: 8px 14px;
-        border: 1px solid #ddd;
+        padding: 9px 14px;
+        border: 1.5px solid #e0e6ed;
         border-radius: 8px;
         font-size: 13px;
-        background: #f9f9fb;
+        background: #f8f9fb;
         outline: none;
+        transition: border-color .2s;
     }
-    .search-bar input:focus { border-color: #4a8dac; }
+    .search-bar input:focus { border-color: #2b8bbd; background: #fff; }
 
     .btn-primary-sm {
-        background: #4a8dac;
+        background: linear-gradient(135deg, #2b8bbd, #1a6d99);
         color: #fff;
         border: none;
-        padding: 8px 20px;
+        padding: 9px 20px;
         border-radius: 8px;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
-        text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        box-shadow: 0 3px 10px rgba(43,139,189,.25);
+        transition: all .2s;
     }
-    .btn-primary-sm:hover { background: #3a7a98; color: #fff; }
+    .btn-primary-sm:hover {
+        background: linear-gradient(135deg, #23729b, #155a80);
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(43,139,189,.35);
+    }
 
     .emp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .emp-table thead th {
-        background: #f0f4f8;
-        padding: 10px 14px;
+        background: #f4f7fb;
+        padding: 11px 14px;
         text-align: left;
         font-weight: 700;
-        color: #555;
-        border-bottom: 2px solid #e0e6ed;
+        color: #666;
+        border-bottom: 2px solid #e4e9f0;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: .4px;
     }
     .emp-table tbody td {
-        padding: 11px 14px;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 12px 14px;
+        border-bottom: 1px solid #f2f4f7;
         color: #333;
         vertical-align: middle;
     }
-    .emp-table tbody tr:hover { background: #f7fafc; }
+    .emp-table tbody tr:hover { background: #f7fafd; }
+    .emp-table tbody tr:last-child td { border-bottom: none; }
 
     .avatar-circle {
-        width: 34px; height: 34px;
+        width: 36px; height: 36px;
         border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 13px; color: #fff;
@@ -69,7 +79,7 @@
 
     .type-badge {
         display: inline-block;
-        padding: 3px 11px;
+        padding: 4px 12px;
         border-radius: 20px;
         font-size: 11px;
         font-weight: 700;
@@ -80,157 +90,278 @@
     .type-packaging  { background: #f4ecf7; color: #7d3c98; }
 
     .action-btn {
-        padding: 4px 12px;
+        padding: 5px 12px;
         border-radius: 6px;
         font-size: 11px;
         font-weight: 600;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        background: #f4f6fb;
+        color: #555;
+        border-color: #e0e6ed;
+        transition: background .15s;
+    }
+    .action-btn:hover { background: #eaecf2; }
+    .btn-pay { background: #e8f4fd; color: #2980b9; border-color: #c8e1f1; margin-left: 4px; }
+    .btn-pay:hover { background: #d4ebf8; }
+
+    /* ── Modals ────────────────────────────────────── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.45);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 32px 40px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 12px 40px rgba(0,0,0,.15);
+        position: relative;
+        animation: slideUp .2s ease;
+    }
+    @@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .modal-close {
+        background: none; border: none; font-size: 20px; color: #999; cursor: pointer;
+    }
+    .modal-close:hover { color: #333; }
+
+    .mfg { margin-bottom: 16px; }
+    .mfg label {
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: #777;
+        margin-bottom: 6px;
+    }
+    .mfg input, .mfg select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #dde1e7;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'Inter', sans-serif;
+        background: #fff;
+        color: #333;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color .2s;
+    }
+    .mfg input:focus, .mfg select:focus { border-color: #2b8bbd; box-shadow: 0 0 0 3px rgba(43,139,189,.08); }
+    .mfg input[readonly] { background: #eef5fa; color: #2b8bbd; font-weight: 600; border-color: #d1e2ef; border-style: dashed; }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 28px;
+    }
+    .btn-cancel {
+        padding: 9px 24px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        background: #fff;
+        color: #555;
+        border: 1.5px solid #dde1e7;
+        cursor: pointer;
+        transition: background .15s;
+    }
+    .btn-cancel:hover { background: #f4f6fb; }
+    .btn-action {
+        padding: 9px 24px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        background: #39a0c8;
+        color: #fff;
         border: none;
         cursor: pointer;
-        text-decoration: none;
+        transition: background .2s;
     }
-    .btn-edit   { background: #eaf4fb; color: #2980b9; }
-    .btn-delete { background: #fdedec; color: #c0392b; margin-left: 4px; }
+    .btn-action:hover { background: #2f8aaebb; }
 
-    .floating-add {
-        position: fixed;
-        bottom: 36px;
-        right: 36px;
-        background: #4a8dac;
-        color: #fff;
-        width: 50px; height: 50px;
-        border-radius: 50%;
-        font-size: 26px;
-        display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 6px 18px rgba(74,141,172,.4);
-        text-decoration: none;
-        transition: transform .2s;
-    }
-    .floating-add:hover { transform: scale(1.1); color: #fff; }
 </style>
 
 <div class="card-box">
     <div class="page-header">
         <h5>👥 Employees</h5>
-        <a href="/Employee/Create" class="btn-primary-sm">＋ Add Employee</a>
+        <button class="btn-primary-sm" onclick="openModal('newHireModal')">＋ New Hire</button>
     </div>
 
     <div class="search-bar">
-        <input type="text" id="empSearch" placeholder="🔍 Search by name, email or type…" oninput="filterTable()" />
+        <input type="text" id="empSearch" placeholder="Search by name, email or type…" oninput="filterTable()" />
     </div>
 
     <table class="emp-table" id="empTable">
         <thead>
             <tr>
-                <th>#</th>
+                <th>ID</th>
                 <th>Employee</th>
                 <th>Email ID</th>
-                <th>Type</th>
+                <th>Department</th>
                 <th>Salary</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>1</td>
+                <td>RI_4001</td>
                 <td>
                     <div style="display:flex;align-items:center;gap:10px;">
-                        <div class="avatar-circle" style="background:#4a8dac;">RK</div>
-                        <span>Rajesh Kumar</span>
+                        <div class="avatar-circle" style="background:#2b8bbd;">RK</div>
+                        <span style="font-weight:600;">Rajesh Kumar</span>
                     </div>
                 </td>
                 <td>rajesh.kumar@ri.com</td>
                 <td><span class="type-badge type-casting">Casting</span></td>
                 <td>₹22,000</td>
                 <td>
-                    <a href="/Employee/Edit/1" class="action-btn btn-edit">Edit</a>
-                    <a href="/Employee/Delete/1" class="action-btn btn-delete" onclick="return confirm('Delete Rajesh Kumar?')">Delete</a>
+                    <button class="action-btn" onclick="openUpdateModal('RI_4001', 'Rajesh Kumar', 'rajesh.kumar@ri.com', 'Casting', 22000)">Edit</button>
+                    <button class="action-btn btn-pay" onclick="openPayModal('Rajesh Kumar', 22000)">Pay</button>
                 </td>
             </tr>
             <tr>
-                <td>2</td>
+                <td>RI_4002</td>
                 <td>
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div class="avatar-circle" style="background:#27ae60;">PS</div>
-                        <span>Priya Shah</span>
+                        <span style="font-weight:600;">Priya Shah</span>
                     </div>
                 </td>
                 <td>priya.shah@ri.com</td>
                 <td><span class="type-badge type-finishing">Finishing Touch</span></td>
                 <td>₹20,000</td>
                 <td>
-                    <a href="/Employee/Edit/2" class="action-btn btn-edit">Edit</a>
-                    <a href="/Employee/Delete/2" class="action-btn btn-delete" onclick="return confirm('Delete Priya Shah?')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div class="avatar-circle" style="background:#f39c12;">AM</div>
-                        <span>Anil Mehta</span>
-                    </div>
-                </td>
-                <td>anil.mehta@ri.com</td>
-                <td><span class="type-badge type-plating">Gold Plating</span></td>
-                <td>₹25,000</td>
-                <td>
-                    <a href="/Employee/Edit/3" class="action-btn btn-edit">Edit</a>
-                    <a href="/Employee/Delete/3" class="action-btn btn-delete" onclick="return confirm('Delete Anil Mehta?')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div class="avatar-circle" style="background:#9b59b6;">SV</div>
-                        <span>Sunita Verma</span>
-                    </div>
-                </td>
-                <td>sunita.verma@ri.com</td>
-                <td><span class="type-badge type-packaging">Packaging</span></td>
-                <td>₹18,000</td>
-                <td>
-                    <a href="/Employee/Edit/4" class="action-btn btn-edit">Edit</a>
-                    <a href="/Employee/Delete/4" class="action-btn btn-delete" onclick="return confirm('Delete Sunita Verma?')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div class="avatar-circle" style="background:#4a8dac;">MJ</div>
-                        <span>Mukesh Joshi</span>
-                    </div>
-                </td>
-                <td>mukesh.joshi@ri.com</td>
-                <td><span class="type-badge type-casting">Casting</span></td>
-                <td>₹23,000</td>
-                <td>
-                    <a href="/Employee/Edit/5" class="action-btn btn-edit">Edit</a>
-                    <a href="/Employee/Delete/5" class="action-btn btn-delete" onclick="return confirm('Delete Mukesh Joshi?')">Delete</a>
-                </td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div class="avatar-circle" style="background:#27ae60;">ND</div>
-                        <span>Neha Desai</span>
-                    </div>
-                </td>
-                <td>neha.desai@ri.com</td>
-                <td><span class="type-badge type-finishing">Finishing Touch</span></td>
-                <td>₹19,500</td>
-                <td>
-                    <a href="/Employee/Edit/6" class="action-btn btn-edit">Edit</a>
-                    <a href="/Employee/Delete/6" class="action-btn btn-delete" onclick="return confirm('Delete Neha Desai?')">Delete</a>
+                    <button class="action-btn" onclick="openUpdateModal('RI_4002', 'Priya Shah', 'priya.shah@ri.com', 'Finishing Touch', 20000)">Edit</button>
+                    <button class="action-btn btn-pay" onclick="openPayModal('Priya Shah', 20000)">Pay</button>
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
 
-<a href="/Employee/Create" class="floating-add" title="Add Employee">＋</a>
+<!-- ── New Hire Modal ────────────────────────────── -->
+<div class="modal-overlay" id="newHireModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <span>+ New Hire</span>
+            <button class="modal-close" onclick="closeModal('newHireModal')">×</button>
+        </div>
+        <div class="mfg">
+            <label>Employee ID (Auto)</label>
+            <input type="text" value="RI_4007" readonly />
+        </div>
+        <div class="mfg">
+            <label>Full Name</label>
+            <input type="text" id="nhName" />
+        </div>
+        <div class="mfg">
+            <label>Email Address</label>
+            <input type="email" id="nhEmail" />
+        </div>
+        <div class="mfg">
+            <label>Department</label>
+            <select id="nhDept">
+                <option value="Casting">Casting</option>
+                <option value="Finishing Touch">Finishing Touch</option>
+                <option value="Gold Plating">Gold Plating</option>
+                <option value="Packaging">Packaging</option>
+            </select>
+        </div>
+        <div class="mfg">
+            <label>Salary (₹)</label>
+            <input type="number" id="nhSalary" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('newHireModal')">Cancel</button>
+            <button class="btn-action" onclick="closeModal('newHireModal')">Create Record</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Update Employee Modal ─────────────────────── -->
+<div class="modal-overlay" id="updateEmpModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <span id="ueTitle">Update Employee RI_4001</span>
+            <button class="modal-close" onclick="closeModal('updateEmpModal')">×</button>
+        </div>
+        <div class="mfg">
+            <label>Full Name</label>
+            <input type="text" id="ueName" />
+        </div>
+        <div class="mfg">
+            <label>Email Address</label>
+            <input type="email" id="ueEmail" />
+        </div>
+        <div class="mfg">
+            <label>Department</label>
+            <select id="ueDept">
+                <option value="Casting">Casting</option>
+                <option value="Finishing Touch">Finishing Touch</option>
+                <option value="Gold Plating">Gold Plating</option>
+                <option value="Packaging">Packaging</option>
+            </select>
+        </div>
+        <div class="mfg">
+            <label>Salary (₹)</label>
+            <input type="text" id="ueSalary" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('updateEmpModal')">Cancel</button>
+            <button class="btn-action" onclick="closeModal('updateEmpModal')">Update Employee</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Pay Salary Modal ──────────────────────────── -->
+<div class="modal-overlay" id="payModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <span id="pmTitle">Pay Salary: Rajesh Kumar</span>
+            <button class="modal-close" onclick="closeModal('payModal')">×</button>
+        </div>
+        <div class="mfg">
+            <label>Amount (₹)</label>
+            <input type="number" id="pmAmount" />
+        </div>
+        <div class="mfg">
+            <label>Payment Mode</label>
+            <select id="pmMode">
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+        </div>
+        <div class="mfg">
+            <label>Date and Time</label>
+            <input type="text" id="pmDate" value="11-03-2026 05:01" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('payModal')">Cancel</button>
+            <button class="btn-action" onclick="closeModal('payModal')">Confirm Payment</button>
+        </div>
+    </div>
+</div>
 
 <script>
     function filterTable() {
@@ -239,4 +370,33 @@
             row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
     }
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('open');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    function openUpdateModal(empId, name, email, dept, salary) {
+        document.getElementById('ueTitle').textContent = 'Update Employee ' + empId;
+        document.getElementById('ueName').value = name;
+        document.getElementById('ueEmail').value = email;
+        document.getElementById('ueDept').value = dept;
+        document.getElementById('ueSalary').value = salary.toLocaleString('en-IN');
+        openModal('updateEmpModal');
+    }
+
+    function openPayModal(name, amount) {
+        document.getElementById('pmTitle').textContent = 'Pay Salary: ' + name;
+        document.getElementById('pmAmount').value = amount;
+        openModal('payModal');
+    }
+
+    // Close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', e => {
+            if (e.target === el) closeModal(el.id);
+        });
+    });
 </script>

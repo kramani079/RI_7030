@@ -73,7 +73,8 @@ namespace RI_7030.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Register(string fullName, string email, string password,
-                                      string confirmPassword, string accountType, string employeeType)
+                                      string confirmPassword, string accountType, string employeeType,
+                                      string mobile, string address)
         {
             // Basic validation
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) ||

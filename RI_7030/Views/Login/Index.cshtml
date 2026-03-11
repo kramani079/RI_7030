@@ -9,150 +9,179 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login - RI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e5e5e5;
-        }
-
-        .top-bar {
-            height: 48px;
-            background-color: #2b8bbd;
-            display: flex;
-            align-items: center;
-            padding: 0 32px;
             box-sizing: border-box;
         }
 
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f2f8fc;
+            min-height: 100vh;
+        }
+
+        /* ── Top Navigation Bar ─────────────────────────────────── */
+        .top-bar {
+            height: 52px;
+            background: linear-gradient(135deg, #2b8bbd 0%, #1a6d99 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            box-shadow: 0 2px 8px rgba(43, 139, 189, 0.25);
+        }
+
         .top-bar .logo {
-            width: 40px;
-            height: 24px;
+            width: 38px;
+            height: 26px;
             background-color: #ffffff;
-            border-radius: 2px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 13px;
             color: #2b8bbd;
             margin-right: auto;
+            letter-spacing: 0.5px;
         }
 
         .top-bar .nav-links {
             display: flex;
-            gap: 32px;
+            gap: 24px;
             margin-right: 24px;
         }
 
         .top-bar .nav-links span {
-            width: 40px;
+            width: 36px;
             height: 4px;
             border-radius: 2px;
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.55);
         }
 
         .top-bar .search-box {
-            width: 160px;
-            height: 24px;
-            background-color: #ffffff;
-            border-radius: 12px;
+            width: 140px;
+            height: 26px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 13px;
         }
 
+        /* ── Page Wrapper ───────────────────────────────────────── */
         .page-wrapper {
-            background-color: #f2f8fc;
-            min-height: calc(100vh - 48px);
+            min-height: calc(100vh - 52px);
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 40px 20px;
         }
 
+        /* ── Login Card ─────────────────────────────────────────── */
         .login-card {
             background-color: #ffffff;
-            width: 520px;
-            max-width: 90%;
-            border-radius: 8px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-            padding: 32px 40px;
-            box-sizing: border-box;
+            width: 680px;
+            max-width: 95%;
+            border-radius: 16px;
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(200, 220, 240, 0.5);
+            padding: 40px 44px;
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 24px;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 36px;
+            animation: cardFadeIn 0.5s ease-out;
         }
 
+        @@keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0);    }
+        }
+
+        /* ── Illustration Panel ─────────────────────────────────── */
         .login-illustration {
-            border-radius: 4px;
-            background: linear-gradient(135deg, #f5fbff, #e8f3ff);
+            border-radius: 12px;
+            background: linear-gradient(145deg, #f5fbff, #e4f0fa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
             position: relative;
-            overflow: hidden;
         }
 
-        .login-illustration::before {
-            content: "";
-            position: absolute;
-            inset: 16px;
-            border-radius: 6px;
-            border: 2px solid #d0e4ff;
+        .illustration-svg {
+            width: 85%;
+            height: auto;
         }
 
-        .login-illustration-inner {
-            position: absolute;
-            left: 24px;
-            bottom: 18px;
-            width: 60%;
-            height: 45%;
-            background: #ffffff;
-            border-radius: 4px;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+        /* ── Role Toggle Tabs ───────────────────────────────────── */
+        .role-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            justify-content: center;
         }
 
-        .login-illustration-person {
-            position: absolute;
-            left: 50%;
-            bottom: 16px;
-            transform: translateX(-40%);
-            width: 60px;
-            height: 90px;
-            background-color: #2b8bbd;
-            border-radius: 8px;
+        .role-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 22px;
+            border: 2px solid #d0e0ec;
+            background-color: #ffffff;
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
         }
 
-        .login-illustration-person::before {
-            content: "";
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #ffd9b3;
+        .role-tab:first-child {
+            border-radius: 8px 0 0 8px;
+            border-right: 1px solid #d0e0ec;
         }
 
-        .login-illustration-person::after {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 42px;
-            height: 16px;
-            border-radius: 8px 8px 0 0;
-            background-color: #1c6085;
+        .role-tab:last-child {
+            border-radius: 0 8px 8px 0;
+            border-left: 1px solid #d0e0ec;
         }
 
+        .role-tab.active {
+            background: linear-gradient(135deg, #2b8bbd, #1a6d99);
+            color: #ffffff;
+            border-color: #2b8bbd;
+        }
+
+        .role-tab .tab-icon {
+            font-size: 14px;
+        }
+
+        .role-tab:not(.active):hover {
+            background-color: #f0f7fc;
+            border-color: #a0c8e0;
+            color: #2b8bbd;
+        }
+
+        /* ── Login Header ───────────────────────────────────────── */
         .login-header {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .login-header h2 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 600;
-            color: #333333;
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 4px;
         }
 
+        .login-header p {
+            font-size: 13px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        /* ── Form Fields ────────────────────────────────────────── */
         .form-group {
             margin-bottom: 16px;
         }
@@ -160,49 +189,91 @@
         .form-group label {
             display: block;
             font-size: 12px;
-            font-weight: 500;
-            color: #555555;
-            margin-bottom: 4px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px 12px;
+            padding: 11px 14px;
             font-size: 13px;
-            border-radius: 4px;
-            border: 1px solid #d0d7de;
-            background-color: #f2f2f2;
-            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            border-radius: 8px;
+            border: 1.5px solid #dde4ec;
+            background-color: #f8f9fb;
+            color: #333;
+            transition: all 0.25s ease;
+        }
+
+        .form-control::placeholder {
+            color: #aab4c0;
         }
 
         .form-control:focus {
             outline: none;
             border-color: #2b8bbd;
             background-color: #ffffff;
-            box-shadow: 0 0 0 2px rgba(43, 139, 189, 0.15);
+            box-shadow: 0 0 0 3px rgba(43, 139, 189, 0.1);
         }
 
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            font-size: 16px;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #2b8bbd;
+        }
+
+        /* ── Login Button ───────────────────────────────────────── */
         .btn-login {
             width: 100%;
             border: none;
-            border-radius: 20px;
-            background-color: #2b8bbd;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #2b8bbd, #1a6d99);
             color: #ffffff;
-            padding: 10px 0;
+            padding: 12px 0;
             font-size: 14px;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
             margin-top: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(43, 139, 189, 0.25);
         }
 
         .btn-login:hover {
-            background-color: #23729b;
+            background: linear-gradient(135deg, #23729b, #155a80);
+            box-shadow: 0 6px 20px rgba(43, 139, 189, 0.35);
+            transform: translateY(-1px);
         }
 
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(43, 139, 189, 0.2);
+        }
+
+        /* ── Footer ─────────────────────────────────────────────── */
         .login-footer {
-            margin-top: 16px;
-            font-size: 12px;
-            color: #777777;
+            margin-top: 18px;
+            font-size: 12.5px;
+            color: #888;
             text-align: center;
         }
 
@@ -210,35 +281,59 @@
             color: #2b8bbd;
             font-weight: 600;
             text-decoration: none;
+            transition: color 0.2s;
         }
 
         .login-footer a:hover {
+            color: #1a6d99;
             text-decoration: underline;
         }
 
+        /* ── Messages ───────────────────────────────────────────── */
         .error-message {
+            background: #fdf0ef;
             color: #c0392b;
-            font-size: 12px;
-            margin-bottom: 8px;
+            font-size: 12.5px;
+            font-weight: 500;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            border: 1px solid #f5c6cb;
         }
 
+        .success-message {
+            background: #d1f5e0;
+            color: #155724;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #b7ebc9;
+        }
+
+        /* ── Hidden role input ──────────────────────────────────── */
+        #roleInput {
+            display: none;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────── */
         @@media (max-width: 720px) {
             .login-card {
                 grid-template-columns: 1fr;
-                padding: 24px;
+                padding: 28px 24px;
+                gap: 20px;
             }
 
             .login-illustration {
-                height: 140px;
+                min-height: 180px;
             }
         }
     </style>
 </head>
 <body>
-    <div style="padding: 16px 32px; color: #777777; font-size: 20px; font-weight: 500;">
-        Login
-    </div>
 
+    <!-- ── Top Bar ──────────────────────────────────────────────── -->
     <div class="top-bar">
         <div class="logo">RI</div>
         <div class="nav-links">
@@ -250,21 +345,87 @@
         <div class="search-box"></div>
     </div>
 
+    <!-- ── Page Content ─────────────────────────────────────────── -->
     <div class="page-wrapper">
         <div class="login-card">
+
+            <!-- Left: Illustration -->
             <div class="login-illustration">
-                <div class="login-illustration-inner"></div>
-                <div class="login-illustration-person"></div>
+                <svg class="illustration-svg" viewBox="0 0 260 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Chart / Board background -->
+                    <rect x="30" y="30" width="160" height="120" rx="8" fill="#ffffff" stroke="#d0e0ec" stroke-width="1.5"/>
+                    <!-- Grid lines -->
+                    <line x1="50" y1="55" x2="170" y2="55" stroke="#e8f0f8" stroke-width="1"/>
+                    <line x1="50" y1="75" x2="170" y2="75" stroke="#e8f0f8" stroke-width="1"/>
+                    <line x1="50" y1="95" x2="170" y2="95" stroke="#e8f0f8" stroke-width="1"/>
+                    <line x1="50" y1="115" x2="170" y2="115" stroke="#e8f0f8" stroke-width="1"/>
+                    <!-- Chart line -->
+                    <polyline points="50,110 75,95 100,100 120,75 145,65 170,50"
+                              stroke="#2b8bbd" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Chart dots -->
+                    <circle cx="50" cy="110" r="3" fill="#2b8bbd"/>
+                    <circle cx="75" cy="95" r="3" fill="#2b8bbd"/>
+                    <circle cx="100" cy="100" r="3" fill="#2b8bbd"/>
+                    <circle cx="120" cy="75" r="3" fill="#2b8bbd"/>
+                    <circle cx="145" cy="65" r="3" fill="#2b8bbd"/>
+                    <circle cx="170" cy="50" r="3" fill="#2b8bbd"/>
+                    <!-- Bar charts at bottom -->
+                    <rect x="55" y="120" width="10" height="18" rx="2" fill="#a0d4ef"/>
+                    <rect x="75" y="115" width="10" height="23" rx="2" fill="#7ec8e8"/>
+                    <rect x="95" y="118" width="10" height="20" rx="2" fill="#a0d4ef"/>
+                    <rect x="115" y="108" width="10" height="30" rx="2" fill="#7ec8e8"/>
+                    <rect x="135" y="112" width="10" height="26" rx="2" fill="#a0d4ef"/>
+                    <rect x="155" y="105" width="10" height="33" rx="2" fill="#7ec8e8"/>
+
+                    <!-- Person body -->
+                    <!-- Head -->
+                    <circle cx="165" cy="160" r="18" fill="#fdd9b5"/>
+                    <!-- Hair -->
+                    <ellipse cx="165" cy="148" rx="16" ry="8" fill="#5a3825"/>
+                    <!-- Body / shirt -->
+                    <rect x="145" y="178" width="40" height="42" rx="6" fill="#2b8bbd"/>
+                    <!-- Arms -->
+                    <rect x="130" y="180" width="16" height="8" rx="4" fill="#2b8bbd"/>
+                    <rect x="184" y="180" width="16" height="8" rx="4" fill="#2b8bbd"/>
+                    <!-- Legs -->
+                    <rect x="150" y="220" width="10" height="16" rx="4" fill="#1a3a5c"/>
+                    <rect x="170" y="220" width="10" height="16" rx="4" fill="#1a3a5c"/>
+                    <!-- Shoes -->
+                    <ellipse cx="155" cy="238" rx="8" ry="4" fill="#333"/>
+                    <ellipse cx="175" cy="238" rx="8" ry="4" fill="#333"/>
+                    <!-- Eyes -->
+                    <circle cx="159" cy="160" r="2" fill="#333"/>
+                    <circle cx="171" cy="160" r="2" fill="#333"/>
+                    <!-- Smile -->
+                    <path d="M160 166 Q165 170 170 166" stroke="#333" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+                    <!-- Pointer stick -->
+                    <line x1="134" y1="184" x2="110" y2="140" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+                </svg>
             </div>
 
+            <!-- Right: Login Form -->
             <div>
-                <div class="login-header">
-                    <h2>Login</h2>
+                <!-- Role Toggle -->
+                <div class="role-tabs">
+                    <button type="button" class="role-tab active" id="adminTab" onclick="switchRole('Admin')">
+                        <span class="tab-icon">👔</span> Admin
+                    </button>
+                    <button type="button" class="role-tab" id="employeeTab" onclick="switchRole('Employee')">
+                        <span class="tab-icon">👤</span> Employee
+                    </button>
                 </div>
 
+                <!-- Header -->
+                <div class="login-header">
+                    <h2 id="loginTitle">Admin Login</h2>
+                    <p id="loginSubtitle">Sign in with your admin credentials</p>
+                </div>
+
+                <!-- Messages -->
                 @if (TempData["RegisterSuccess"] != null)
                 {
-                    <div style="background:#d1f5e0;color:#155724;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:600;">
+                    <div class="success-message">
                         ✔ @TempData["RegisterSuccess"]
                     </div>
                 }
@@ -274,27 +435,126 @@
                     <div class="error-message">@ViewBag.ErrorMessage</div>
                 }
 
-                <form asp-action="Index" asp-controller="Login" method="post">
+                <!-- Form -->
+                <form asp-action="Index" asp-controller="Login" method="post" id="loginForm">
+                    <input type="hidden" id="roleInput" name="role" value="Admin" />
+
                     <div class="form-group">
                         <label for="email">Email ID</label>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="Email ID" />
+                        <input type="email" id="email" name="email" class="form-control"
+                               placeholder="Enter your email" autocomplete="email" />
                     </div>
 
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" class="form-control" placeholder="Password" />
+                        <div class="input-wrapper">
+                            <input type="password" id="password" name="password" class="form-control"
+                                   placeholder="Enter your password" autocomplete="current-password" />
+                            <button type="button" class="password-toggle" id="togglePassword"
+                                    onclick="togglePasswordVisibility()" title="Show password">
+                                <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div style="text-align: right; margin-top: 8px;">
+                            <a href="#" onclick="openForgotModal(); return false;" style="font-size: 12px; color: #2b8bbd; font-weight: 600; text-decoration: none;">Forgot Password?</a>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn-login">Login</button>
+                    <button type="submit" class="btn-login" id="loginBtn">Login as Admin</button>
                 </form>
 
                 <div class="login-footer">
-                    New user?
-                    <a asp-controller="Login" asp-action="Register">Register</a>
+                    Don't have an account?
+                    <a asp-controller="Login" asp-action="Register">Register here</a>
                 </div>
             </div>
+
         </div>
     </div>
+
+    <!-- ── Forgot Password Modal ─────────────────────────────────────────── -->
+    <div id="forgotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center;">
+        <div style="background:#fff; width:400px; padding:32px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+            <h3 style="font-size:18px; font-weight:700; color:#1a1a2e; margin-bottom:8px;">Reset Password</h3>
+            <p style="font-size:13px; color:#888; margin-bottom:20px;">Enter your Email ID to receive a password reset link.</p>
+            
+            <form onsubmit="handleForgotSubmit(event)">
+                <div class="form-group">
+                    <label>Email ID</label>
+                    <input type="email" class="form-control" required placeholder="Enter your registered email" />
+                </div>
+                <div id="forgotSuccess" style="display:none; color:#155724; background:#d1f5e0; padding:10px; border-radius:6px; font-size:12px; font-weight:600; margin-bottom:16px;">
+                    ✔ Password recovery email sent! Check your inbox.
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
+                    <button type="button" onclick="closeForgotModal()" style="padding:8px 16px; border-radius:6px; background:#f4f6fb; color:#555; border:1px solid #dde4ec; font-size:13px; font-weight:600; cursor:pointer;">Cancel</button>
+                    <button type="submit" style="padding:8px 20px; border-radius:6px; background:linear-gradient(135deg, #2b8bbd, #1a6d99); color:#fff; border:none; font-size:13px; font-weight:600; cursor:pointer;">Send Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── JavaScript ───────────────────────────────────────────── -->
+    <script>
+        let currentRole = 'Admin';
+
+        function switchRole(role) {
+            currentRole = role;
+
+            // Update tabs
+            document.getElementById('adminTab').classList.toggle('active', role === 'Admin');
+            document.getElementById('employeeTab').classList.toggle('active', role === 'Employee');
+
+            // Update header
+            document.getElementById('loginTitle').textContent = role + ' Login';
+            document.getElementById('loginSubtitle').textContent =
+                'Sign in with your ' + role.toLowerCase() + ' credentials';
+
+            // Update button
+            document.getElementById('loginBtn').textContent = 'Login as ' + role;
+
+            // Update hidden input
+            document.getElementById('roleInput').value = role;
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML =
+                    '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>' +
+                    '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>' +
+                    '<path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>' +
+                    '<line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML =
+                    '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+                    '<circle cx="12" cy="12" r="3"/>';
+            }
+        }
+
+        function openForgotModal() {
+            document.getElementById('forgotModal').style.display = 'flex';
+            document.getElementById('forgotSuccess').style.display = 'none';
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').style.display = 'none';
+        }
+
+        function handleForgotSubmit(e) {
+            e.preventDefault();
+            document.getElementById('forgotSuccess').style.display = 'block';
+            setTimeout(() => { closeForgotModal(); }, 2500);
+        }
+    </script>
+
 </body>
 </html>
-

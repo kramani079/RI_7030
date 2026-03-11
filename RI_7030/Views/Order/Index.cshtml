@@ -158,9 +158,9 @@
                 </td>
                 <td><span class="badge badge-prod">In Production</span></td>
                 <td>
-                    <a href="/Order/Details/1" class="action-btn btn-view">View</a>
-                    <a href="/Order/Edit/1"    class="action-btn btn-edit">Edit</a>
-                    <a href="/Order/Delete/1"  class="action-btn btn-delete" onclick="return confirm('Delete order #ORD-101?')">Del</a>
+                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2001', 'Mahesh Patel', 'mahesh@gmail.com', 'Gold Chain', 'RI_1002', 50, 5000, 250000, 'Feb 28, 2026', 'In Production', '75%')">View</button>
+                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2001', 'Mahesh Patel', 'mahesh@gmail.com', 'RI_1002', 'Gold Chain', 50, 5000, 250000, '2026-02-28', 'InProduction')">Edit</button>
+                    <a href="/Order/Delete/1"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
                 </td>
             </tr>
             <tr data-status="InProduction">
@@ -187,9 +187,9 @@
                 </td>
                 <td><span class="badge badge-prod">In Production</span></td>
                 <td>
-                    <a href="/Order/Details/2" class="action-btn btn-view">View</a>
-                    <a href="/Order/Edit/2"    class="action-btn btn-edit">Edit</a>
-                    <a href="/Order/Delete/2"  class="action-btn btn-delete" onclick="return confirm('Delete order #ORD-102?')">Del</a>
+                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2002', 'Ramesh Jewellers', 'ramesh@jewellers.com', 'Ring Set', 'RI_1003', 30, 3000, 90000, 'Mar 2, 2026', 'In Production', '50%')">View</button>
+                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2002', 'Ramesh Jewellers', 'ramesh@jewellers.com', 'RI_1003', 'Ring Set', 30, 3000, 90000, '2026-03-02', 'InProduction')">Edit</button>
+                    <a href="/Order/Delete/2"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
                 </td>
             </tr>
             <tr data-status="Pending">
@@ -216,9 +216,9 @@
                 </td>
                 <td><span class="badge badge-pending">Pending</span></td>
                 <td>
-                    <a href="/Order/Details/3" class="action-btn btn-view">View</a>
-                    <a href="/Order/Edit/3"    class="action-btn btn-edit">Edit</a>
-                    <a href="/Order/Delete/3"  class="action-btn btn-delete" onclick="return confirm('Delete order #ORD-103?')">Del</a>
+                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2003', 'Vijay Exports', 'vijay@exports.com', 'Necklace', 'RI_1005', 20, 6000, 120000, 'Mar 5, 2026', 'Pending', '25%')">View</button>
+                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2003', 'Vijay Exports', 'vijay@exports.com', 'RI_1005', 'Necklace', 20, 6000, 120000, '2026-03-05', 'Pending')">Edit</button>
+                    <a href="/Order/Delete/3"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
                 </td>
             </tr>
             <tr data-status="Ready">
@@ -245,9 +245,9 @@
                 </td>
                 <td><span class="badge badge-ready">Ready ✔</span></td>
                 <td>
-                    <a href="/Order/Details/4" class="action-btn btn-view">View</a>
-                    <a href="/Order/Edit/4"    class="action-btn btn-edit">Edit</a>
-                    <a href="/Order/Delete/4"  class="action-btn btn-delete" onclick="return confirm('Delete order #ORD-104?')">Del</a>
+                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2004', 'Anita Stores', 'anita@stores.com', 'Earrings', 'RI_1006', 100, 500, 50000, 'Mar 7, 2026', 'Ready', '100%')">View</button>
+                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2004', 'Anita Stores', 'anita@stores.com', 'RI_1006', 'Earrings', 100, 500, 50000, '2026-03-07', 'Ready')">Edit</button>
+                    <a href="/Order/Delete/4"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
                 </td>
             </tr>
             <tr data-status="Pending">
@@ -321,7 +321,134 @@
 
 <a href="/Order/Create" class="floating-add" title="New Order">＋</a>
 
+<!-- ── Order Modals Styles ─────────────────────── -->
+<style>
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: #fff; border-radius: 12px; padding: 32px 40px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,.15); position: relative; animation: slideUp .2s ease; }
+    .modal-box.md-large { max-width: 550px; }
+    .modal-box.md-view { max-width: 440px; }
+    @@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+    .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
+    .modal-close:hover { color: #333; }
+
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    .mfg { display: flex; flex-direction: column; }
+    .mfg label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #777; margin-bottom: 6px; }
+    .mfg input, .mfg select { width: 100%; padding: 10px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; background: #fff; color: #333; outline: none; transition: border-color .2s; }
+    .mfg input:focus, .mfg select:focus { border-color: #2b8bbd; box-shadow: 0 0 0 3px rgba(43,139,189,.08); }
+    .mfg input[readonly] { background: #eef5fa; color: #2b8bbd; font-weight: 600; border: none; }
+
+    .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+    .btn-cancel { padding: 9px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; background: #fff; color: #555; border: 1.5px solid #dde1e7; cursor: pointer; transition: background .15s; }
+    .btn-cancel:hover { background: #f4f6fb; }
+    .btn-action { padding: 9px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; background: #39a0c8; color: #fff; border: none; cursor: pointer; transition: background .2s; }
+    .btn-action:hover { background: #2f8aaebb; }
+
+    .det-row { display: flex; align-items: baseline; font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
+    .det-lbl { font-weight: 700; color: #1a1a2e; width: 110px; flex-shrink: 0; }
+    .det-val { color: #333; }
+</style>
+
+<!-- ── Order Details Modal ───────────────────────── -->
+<div class="modal-overlay" id="orderDetailsModal">
+    <div class="modal-box md-view">
+        <div class="modal-title">
+            <span id="vdTitle">Order Details: RI_2001</span>
+            <button class="modal-close" onclick="closeModal('orderDetailsModal')">×</button>
+        </div>
+        <div>
+            <div class="det-row"><span class="det-lbl">Customer:</span><span class="det-val" id="vdCust">Mahesh Patel</span></div>
+            <div class="det-row"><span class="det-lbl">Email:</span><span class="det-val" id="vdEmail">mahesh@gmail.com</span></div>
+            <div class="det-row"><span class="det-lbl">Product:</span><span class="det-val" id="vdProduct">Gold Chain (RI_1002)</span></div>
+            <div class="det-row"><span class="det-lbl">Quantity:</span><span class="det-val" id="vdQty">50</span></div>
+            <div class="det-row"><span class="det-lbl">Unit Price:</span><span class="det-val" id="vdUp">₹5,000</span></div>
+            <div class="det-row"><span class="det-lbl">Total Amount:</span><span class="det-val" id="vdTotal">₹2,50,000</span></div>
+            <div class="det-row"><span class="det-lbl">Due Date:</span><span class="det-val" id="vdDue">Feb 28, 2026</span></div>
+            <div class="det-row"><span class="det-lbl">Status:</span><span class="det-val" id="vdStatus">In Production</span></div>
+            <div class="det-row"><span class="det-lbl">Progress:</span><span class="det-val" id="vdProg">75%</span></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('orderDetailsModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Edit Order Modal ──────────────────────────── -->
+<div class="modal-overlay" id="editOrderModal">
+    <div class="modal-box md-large">
+        <div class="modal-title">
+            <span>Edit Order</span>
+            <button class="modal-close" onclick="closeModal('editOrderModal')">×</button>
+        </div>
+        <div class="modal-grid">
+            <div class="mfg"><label>Customer Name</label><input type="text" id="eoCust" /></div>
+            <div class="mfg"><label>Email</label><input type="email" id="eoEmail" /></div>
+            <div class="mfg"><label>Product ID</label><input type="text" id="eoPid" /></div>
+            <div class="mfg"><label>Product Name</label><input type="text" id="eoPname" /></div>
+            <div class="mfg"><label>Quantity</label><input type="number" id="eoQty" oninput="calcEditOrderTotal()" /></div>
+            <div class="mfg"><label>Unit Price (₹)</label><input type="number" id="eoUp" oninput="calcEditOrderTotal()" /></div>
+            <div class="mfg"><label>Total Amount (₹)</label><input type="text" id="eoTotal" readonly /></div>
+            <div class="mfg"><label>Due Date</label><input type="date" id="eoDue" /></div>
+            <div class="mfg" style="grid-column: 1 / -1;"><label>Status</label>
+                <select id="eoStatus">
+                    <option value="Pending">Pending</option>
+                    <option value="InProduction">In Production</option>
+                    <option value="Ready">Ready</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('editOrderModal')">Cancel</button>
+            <button class="btn-action" onclick="closeModal('editOrderModal')">Save Order</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function openDetailsModal(id, cust, email, pName, pId, qty, up, total, due, status, prog) {
+        document.getElementById('vdTitle').textContent = 'Order Details: ' + id;
+        document.getElementById('vdCust').textContent = cust;
+        document.getElementById('vdEmail').textContent = email;
+        document.getElementById('vdProduct').textContent = pName + ' (' + pId + ')';
+        document.getElementById('vdQty').textContent = qty;
+        document.getElementById('vdUp').textContent = '₹' + up.toLocaleString('en-IN');
+        document.getElementById('vdTotal').textContent = '₹' + total.toLocaleString('en-IN');
+        document.getElementById('vdDue').textContent = due;
+        document.getElementById('vdStatus').textContent = status;
+        document.getElementById('vdProg').textContent = prog;
+        openModal('orderDetailsModal');
+    }
+
+    function openEditModal(id, cust, email, pId, pName, qty, up, total, due, status) {
+        document.getElementById('eoCust').value = cust;
+        document.getElementById('eoEmail').value = email;
+        document.getElementById('eoPid').value = pId;
+        document.getElementById('eoPname').value = pName;
+        document.getElementById('eoQty').value = qty;
+        document.getElementById('eoUp').value = up;
+        document.getElementById('eoTotal').value = total.toLocaleString('en-IN');
+        document.getElementById('eoDue').value = due;
+        document.getElementById('eoStatus').value = status;
+        openModal('editOrderModal');
+    }
+
+    function calcEditOrderTotal() {
+        const q = parseFloat(document.getElementById('eoQty').value) || 0;
+        const u = parseFloat(document.getElementById('eoUp').value) || 0;
+        document.getElementById('eoTotal').value = (q * u).toLocaleString('en-IN');
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+    });
     function filterOrders() {
         const q = document.getElementById('orderSearch').value.toLowerCase();
         document.querySelectorAll('#orderTable tbody tr').forEach(row => {

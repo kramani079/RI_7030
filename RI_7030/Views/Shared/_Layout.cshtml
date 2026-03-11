@@ -1,7 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var currentPage = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>RI_7030 - @ViewData["Title"]</title>
 
     <link rel="stylesheet" href="~/css/dashboard.css" />
@@ -18,11 +22,21 @@
             <div class="brand">RI</div>
 
             <ul>
-                <li><a href="/">🏠 Home</a></li>
-                <li><a href="/Order">📋 Orders</a></li>
-                <li><a href="/Inventory">📦 Inventory</a></li>
-                <li><a href="/Employee">👥 Employees</a></li>
-                <li><a href="/Transaction">💳 Transactions</a></li>
+                <li class="@(currentPage == "Home" ? "active" : "")">
+                    <a href="/">🏠 Home</a>
+                </li>
+                <li class="@(currentPage == "Order" ? "active" : "")">
+                    <a href="/Order">📋 Orders</a>
+                </li>
+                <li class="@(currentPage == "Inventory" ? "active" : "")">
+                    <a href="/Inventory">📦 Inventory</a>
+                </li>
+                <li class="@(currentPage == "Employee" ? "active" : "")">
+                    <a href="/Employee">👥 Employees</a>
+                </li>
+                <li class="@(currentPage == "Transaction" ? "active" : "")">
+                    <a href="/Transaction">💳 Transactions</a>
+                </li>
             </ul>
         </div>
 
@@ -31,15 +45,19 @@
 
             <!-- TOPBAR -->
             <div class="topbar">
-                <span style="color:rgba(255,255,255,0.75);font-size:13px;font-weight:500;">
-                    👋 Welcome, @(Context.Session.GetString("Name") ?? "User")
-                    <span style="margin-left:8px;padding:2px 10px;background:rgba(255,255,255,0.2);border-radius:12px;font-size:11px;">
+                <span style="color:rgba(255,255,255,0.9);font-size:13px;font-weight:600;">
+                    Welcome, @(Context.Session.GetString("Name")?.ToUpper() ?? "USER")
+                    <span style="margin-left:10px;padding:3px 12px;background:rgba(255,255,255,0.2);border-radius:12px;font-size:11px;font-weight:700;">
                         @(Context.Session.GetString("Role") ?? "")
                     </span>
                 </span>
-                <div style="display:flex;align-items:center;gap:16px;margin-left:auto;">
-                    <a class="profile" asp-controller="Profile" asp-action="Index" style="font-size:20px;text-decoration:none;">👤</a>
-                    <a href="/Login/Logout" style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.4);padding:5px 14px;border-radius:8px;">
+                <div style="display:flex;align-items:center;gap:14px;margin-left:auto;">
+                    <a asp-controller="Profile" asp-action="Index"
+                       style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.35);padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;transition:background 0.2s;">
+                        Profile
+                    </a>
+                    <a href="/Login/Logout"
+                       style="background:rgba(255,255,255,0.9);color:#1a6d99;padding:6px 18px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;border:none;transition:all 0.2s;">
                         Logout
                     </a>
                 </div>
