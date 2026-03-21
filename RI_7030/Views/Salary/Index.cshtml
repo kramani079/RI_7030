@@ -1,0 +1,132 @@
+@{
+    ViewData["Title"] = "Salary";
+    var isAdmin = Context.Session.GetString("Role") == "Admin";
+    var pending = ViewBag.PendingAdvances as List<RI_7030.Models.Transaction> ?? new();
+    var history = ViewBag.SalaryHistory as List<RI_7030.Models.Transaction> ?? new();
+    var T  = ViewBag.T as Dictionary<string, string> ?? new();
+    string Tr(string k) => T.TryGetValue(k, out var v) ? v : k;
+}
+
+<style>
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .page-header h5 { margin:0; font-size:18px; font-weight:700; color:#1a1a2e; }
+    .btn-primary-sm { background:linear-gradient(135deg,#2b8bbd,#1a6d99); color:#fff; border:none; padding:9px 20px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+    .salary-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .salary-table thead th { background:#f4f7fb; padding:11px 14px; text-align:left; font-weight:700; color:#666; border-bottom:2px solid #e4e9f0; }
+    .salary-table tbody td { padding:12px 14px; border-bottom:1px solid #f2f4f7; color:#333; vertical-align:middle; }
+    .salary-table tbody tr:hover { background:#f7fafd; }
+    .bdg { display:inline-block; padding:3px 11px; border-radius:20px; font-size:11px; font-weight:700; }
+    .bdg-pending { background:#fff8e1; color:#856404; } .bdg-paid { background:#d1f5e0; color:#155724; }
+    .bdg-advance { background:#e8f4fd; color:#2980b9; } .bdg-salary { background:#eafaf1; color:#1e8449; }
+    .action-btn { padding:5px 14px; border-radius:6px; font-size:11px; font-weight:600; border:none; cursor:pointer; }
+    .btn-pay { background:#eafaf1; color:#1e8449; }
+    .empty-state { text-align:center; color:#bbb; padding:40px; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:12px; padding:28px 36px; width:100%; max-width:440px; box-shadow:0 12px 40px rgba(0,0,0,.15); animation:slideUp .2s ease; }
+    @@keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    .modal-title { font-size:18px; font-weight:700; color:#1a1a2e; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; }
+    .modal-close { background:none; border:none; font-size:20px; color:#999; cursor:pointer; }
+    .mfg { margin-bottom:14px; }
+    .mfg label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#777; margin-bottom:5px; }
+    .mfg input, .mfg textarea, .mfg select { width:100%; padding:9px 13px; border:1.5px solid #dde1e7; border-radius:8px; font-size:13px; background:#fff; color:#333; outline:none; box-sizing:border-box; }
+    .mfg textarea { resize:vertical; min-height:60px; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; }
+    .btn-cancel { padding:9px 24px; border-radius:8px; font-size:13px; font-weight:600; background:#fff; color:#555; border:1.5px solid #dde1e7; cursor:pointer; }
+    .btn-action { padding:9px 24px; border-radius:8px; font-size:13px; font-weight:600; background:#39a0c8; color:#fff; border:none; cursor:pointer; }
+</style>
+
+<div class="card-box">
+    @if (isAdmin)
+    {
+        <div class="page-header"><h5>@Tr("salary_pending_title")</h5></div>
+        @if (!pending.Any())
+        {
+            <div class="empty-state">@Tr("no_pending_adv")</div>
+        }
+        else
+        {
+            <table class="salary-table">
+                <thead><tr><th>@Tr("tx_id")</th><th>@Tr("employee")</th><th>@Tr("amount")</th><th>@Tr("requested")</th><th>@Tr("status")</th><th>@Tr("actions")</th></tr></thead>
+                <tbody>
+                    @foreach (var tx in pending)
+                    {
+                        <tr>
+                            <td><strong>@tx.TransactionId</strong></td>
+                            <td>@(tx.PartyName ?? "—")</td>
+                            <td style="font-weight:700;">₹@tx.Amount.ToString("N0")</td>
+                            <td>@tx.TransactionDate.ToString("dd MMM yyyy")</td>
+                            <td><span class="bdg bdg-pending">@Tr("s_pending")</span></td>
+                            <td>
+                                <form method="post" action="/Salary/PayAdvance/@tx.TransactionId" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="action-btn btn-pay" onclick="return confirm('@Tr("pay_adv_confirm")')">@Tr("pay_now")</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+    else
+    {
+        <div class="page-header">
+            <h5>@Tr("my_salary")</h5>
+            <button class="btn-primary-sm" onclick="openModal('advanceModal')">@Tr("request_advance")</button>
+        </div>
+        @if (!history.Any())
+        {
+            <div class="empty-state">@Tr("no_salary_records")</div>
+        }
+        else
+        {
+            <table class="salary-table">
+                <thead><tr><th>@Tr("tx_id")</th><th>@Tr("type")</th><th>@Tr("amount")</th><th>@Tr("status")</th><th>@Tr("date")</th></tr></thead>
+                <tbody>
+                    @foreach (var tx in history)
+                    {
+                        <tr>
+                            <td><strong>@tx.TransactionId</strong></td>
+                            <td>
+                                @if (tx.Category == "EMP_ADVANCE")
+                                { <span class="bdg bdg-advance">@Tr("advance")</span> }
+                                else
+                                { <span class="bdg bdg-salary">@Tr("salary_label")</span> }
+                            </td>
+                            <td style="font-weight:700; color:#27ae60;">₹@tx.Amount.ToString("N0")</td>
+                            <td><span class="bdg @(tx.Status == "Paid" ? "bdg-paid" : "bdg-pending")">@(tx.Status == "Paid" ? Tr("s_paid") : Tr("s_pending"))</span></td>
+                            <td>@tx.TransactionDate.ToString("dd MMM yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <div class="modal-overlay" id="advanceModal">
+            <div class="modal-box">
+                <div class="modal-title">
+                    <span>@Tr("request_salary_adv")</span>
+                    <button class="modal-close" onclick="closeModal('advanceModal')">×</button>
+                </div>
+                <form method="post" action="/Salary/RequestAdvance">
+                    @Html.AntiForgeryToken()
+                    <div class="mfg"><label>@Tr("advance_amount")</label><input name="amount" type="number" min="100" step="100" required placeholder="e.g. 5000" /></div>
+                    <div class="mfg"><label>@Tr("reason_optional")</label><textarea name="reason" placeholder="..."></textarea></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeModal('advanceModal')">@Tr("cancel")</button>
+                        <button type="submit" class="btn-action">@Tr("submit_request")</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+    });
+</script>

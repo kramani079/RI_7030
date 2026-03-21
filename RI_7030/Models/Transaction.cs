@@ -1,73 +1,51 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RI_7030.Models
 {
-    public enum TransactionStatus
-    {
-        Pending,
-        Paid,
-        Cancelled,
-        Refunded
-    }
-
-    public enum PaymentMethod
-    {
-        Cash,
-        CreditCard,
-        DebitCard,
-        BankTransfer,
-        Online
-    }
-
+    /// <summary>
+    /// Financial transaction — RI_3001, RI_3002, ...
+    /// Type:     Buy | Sell
+    /// Status:   Pending | Paid | Received | Cancelled
+    /// Category: EMP_SALARY | EMP_ADVANCE | PRODUCT | EXPENSE
+    /// </summary>
     public class Transaction
     {
-        public int TransactionId { get; set; }
+        [Key]
+        [StringLength(20)]
+        public string TransactionId { get; set; } = string.Empty;
 
+        /// <summary>Buy | Sell</summary>
         [Required]
-        [Display(Name = "Transaction Date")]
-        [DataType(DataType.DateTime)]
-        public DateTime TransactionDate { get; set; } = DateTime.Now;
-
-        [Required]
-        [StringLength(150)]
-        [Display(Name = "Customer Name")]
-        public string CustomerName { get; set; } = string.Empty;
-
-        [EmailAddress]
-        [StringLength(200)]
-        [Display(Name = "Customer Email")]
-        public string? CustomerEmail { get; set; }
-
-        // Foreign key to InventoryItem
-        [Display(Name = "Item")]
-        public int? ItemId { get; set; }
+        [StringLength(10)]
+        public string Type { get; set; } = "Buy";
 
         [StringLength(150)]
-        [Display(Name = "Product / Item")]
-        public string? ItemName { get; set; }
+        public string? PartyName { get; set; }
 
-        [Required]
-        [Range(1, int.MaxValue)]
+        [StringLength(20)]
+        public string? ProductId { get; set; }
+
+        [StringLength(150)]
+        public string? ProductName { get; set; }
+
         public int Quantity { get; set; }
 
-        [Required]
-        [Range(0, 10_000_000)]
-        [Display(Name = "Unit Price")]
-        [DataType(DataType.Currency)]
-        public decimal UnitPrice { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Amount { get; set; }
 
-        [Display(Name = "Total Amount")]
-        [DataType(DataType.Currency)]
-        public decimal TotalAmount => Quantity * UnitPrice;
+        /// <summary>Pending | Paid | Received | Cancelled</summary>
+        [StringLength(20)]
+        public string Status { get; set; } = "Pending";
 
-        [Required]
-        public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
+        public DateTime TransactionDate { get; set; } = DateTime.Now;
 
-        [Required]
-        [Display(Name = "Payment Method")]
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
+        /// <summary>EMP_SALARY | EMP_ADVANCE | PRODUCT | EXPENSE</summary>
+        [StringLength(30)]
+        public string? Category { get; set; }
 
-        [StringLength(500)]
-        public string? Notes { get; set; }
+        /// <summary>Cash | UPI | Bank Transfer | Pending</summary>
+        [StringLength(30)]
+        public string? PaymentMethod { get; set; }
     }
 }

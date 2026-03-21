@@ -4,76 +4,58 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RI_7030.Models
 {
     /// <summary>
-    /// Represents a product in inventory.
-    /// Every product passes through 4 employee stages before it is complete:
-    ///   Stage 1 – Casting
-    ///   Stage 2 – Finishing Touch
-    ///   Stage 3 – Gold Plating
-    ///   Stage 4 – Packaging
+    /// Product in inventory — string PK: RI_1001, RI_1002, ...
     /// </summary>
     public class Product
     {
         [Key]
-        public int ProductId { get; set; }
+        [StringLength(20)]
+        public string ProductId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Product name is required.")]
         [StringLength(150)]
         [Display(Name = "Product Name")]
-        public string ProductName { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
-        // Stores the relative or absolute path / URL to the uploaded image
-        [Display(Name = "Product Image")]
-        public string? ImagePath { get; set; }
-
-        [Required(ErrorMessage = "Stock quantity is required.")]
+        [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Stock cannot be negative.")]
         [Display(Name = "Stock Quantity")]
-        public int StockQuantity { get; set; }
+        public int Stock { get; set; }
 
-        // ── Production Stage Completion Flags ───────────────────────────────
-        // Each stage is handled by a specific EmployeeType.
-        // Mark true once that stage's employee has completed their work.
+        /// <summary>True when Stock &lt; 15</summary>
+        public bool LowStock { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Unit Cost (₹)")]
+        public decimal UnitCost { get; set; }
+
+        // ── Production Stage Flags ───────────────────────────
         [Display(Name = "Casting Done")]
-        public bool IsCastingDone { get; set; } = false;
+        public bool Stage_Casting { get; set; }
 
         [Display(Name = "Finishing Touch Done")]
-        public bool IsFinishingTouchDone { get; set; } = false;
+        public bool Stage_Finishing { get; set; }
 
         [Display(Name = "Gold Plating Done")]
-        public bool IsGoldPlatingDone { get; set; } = false;
+        public bool Stage_GoldPlating { get; set; }
 
         [Display(Name = "Packaging Done")]
-        public bool IsPackagingDone { get; set; } = false;
+        public bool Stage_Packaging { get; set; }
 
-        // ── Computed Properties ─────────────────────────────────────────────
-
-        /// <summary>
-        /// Returns how many of the 4 stages are complete (0 – 4).
-        /// </summary>
+        // ── Computed (not mapped) ────────────────────────────
         [NotMapped]
         public int CompletedStages =>
-            (IsCastingDone        ? 1 : 0) +
-            (IsFinishingTouchDone ? 1 : 0) +
-            (IsGoldPlatingDone    ? 1 : 0) +
-            (IsPackagingDone      ? 1 : 0);
+            (Stage_Casting     ? 1 : 0) +
+            (Stage_Finishing   ? 1 : 0) +
+            (Stage_GoldPlating ? 1 : 0) +
+            (Stage_Packaging   ? 1 : 0);
 
-        /// <summary>
-        /// Completion percentage (0 %, 25 %, 50 %, 75 %, 100 %).
-        /// </summary>
         [NotMapped]
-        [Display(Name = "Completion %")]
         public int CompletionPercentage => CompletedStages * 25;
 
-        /// <summary>
-        /// True only when all 4 stages are done.
-        /// </summary>
         [NotMapped]
         public bool IsComplete => CompletedStages == 4;
 
-        /// <summary>
-        /// Human-readable label for the next pending stage.
-        /// </summary>
         [NotMapped]
         [Display(Name = "Current Stage")]
         public string CurrentStageLabel => CompletedStages switch

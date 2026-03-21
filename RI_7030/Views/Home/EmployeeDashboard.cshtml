@@ -1,0 +1,81 @@
+@{
+    var todaySales   = (decimal)(ViewBag.TodaySales ?? 0m);
+    var lowStockCount = (int)(ViewBag.LowStockCount ?? 0);
+    var recentTx = ViewBag.RecentTransactions as List<RI_7030.Models.Transaction> ?? new();
+    var T  = ViewBag.T as Dictionary<string, string> ?? new();
+    string Tr(string k) => T.TryGetValue(k, out var v) ? v : k;
+}
+
+<style>
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .sum-card { background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.07); border-left: 5px solid transparent; display: flex; flex-direction: column; gap: 6px; transition: box-shadow .15s, transform .15s; }
+    .sum-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.12); transform: translateY(-2px); }
+    .sum-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #888; font-weight: 600; }
+    .sum-card .amount { font-size: 24px; font-weight: 700; color: #1a1a2e; }
+    .sum-card .sub { font-size: 12px; color: #aaa; }
+    .sum-card.receive { border-color: #27ae60; } .sum-card.receive .amount { color: #27ae60; }
+    .sum-card.orders  { border-color: #f39c12; } .sum-card.orders  .amount { color: #f39c12; }
+    .sum-card.net     { border-color: #3498db; } .sum-card.net     .amount { color: #3498db; }
+    .orders-section { background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.07); }
+    .order-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .order-table thead th { background: #f4f6fb; padding: 9px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 1px solid #eee; }
+    .order-table tbody td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+    .order-table tbody tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .badge-pending  { background: #fef9e7; color: #b7950b; }
+    .empty-state { text-align: center; color: #bbb; padding: 30px; font-size: 14px; }
+    @@media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<div class="summary-grid">
+    <div class="sum-card receive">
+        <div class="label">@Tr("today_sales")</div>
+        <div class="amount">₹@todaySales.ToString("N0")</div>
+        <div class="sub">@Tr("today_sell_tx")</div>
+    </div>
+    <div class="sum-card orders">
+        <div class="label">@Tr("low_stock")</div>
+        <div class="amount">@lowStockCount</div>
+        <div class="sub">@Tr("stock_below_15")</div>
+    </div>
+    <div class="sum-card net">
+        <div class="label">@Tr("my_department")</div>
+        <div class="amount" style="font-size:18px;">@(Context.Session.GetString("EmpType") ?? "—")</div>
+        <div class="sub">@(Context.Session.GetString("EmpId") ?? "")</div>
+    </div>
+</div>
+
+<div class="orders-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h6 style="margin:0;font-size:14px;font-weight:700;color:#333;">📋 @Tr("recent_tx")</h6>
+        <a href="/Transaction" style="font-size:12px;color:#4a8dac;font-weight:600;text-decoration:none;">@Tr("view_all")</a>
+    </div>
+    @if (!recentTx.Any())
+    {
+        <div class="empty-state">@Tr("no_tx_yet")</div>
+    }
+    else
+    {
+        <table class="order-table">
+            <thead>
+                <tr><th>@Tr("id")</th><th>@Tr("type")</th><th>@Tr("party")</th><th>@Tr("product")</th><th>@Tr("amount")</th><th>@Tr("status")</th><th>@Tr("date")</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var tx in recentTx)
+                {
+                    <tr>
+                        <td><strong>@tx.TransactionId</strong></td>
+                        <td>@tx.Type</td>
+                        <td>@(tx.PartyName ?? "—")</td>
+                        <td>@(tx.ProductName ?? "—")</td>
+                        <td style="color:@(tx.Type == "Sell" ? "#27ae60" : "#e74c3c")">
+                            @(tx.Type == "Sell" ? "+" : "−")₹@tx.Amount.ToString("N0")
+                        </td>
+                        <td><span class="badge badge-pending">@tx.Status</span></td>
+                        <td>@tx.TransactionDate.ToString("dd MMM HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

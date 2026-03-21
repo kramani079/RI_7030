@@ -1,199 +1,153 @@
+@model RI_7030.Models.User
 @{
     ViewData["Title"] = "Profile";
-
-    // Data corresponding to the "My Profile" screenshot.
-    var fname = "KRISH";
-    var lname = "RAMANI";
-    var fullName = $"{fname} {lname}";
-    var initials = "KR";
-    var role = "Admin";
-    var location = "Surat, Gujarat, India";
-    var email = "kramani079@rku.ac.in";
-    var phone = "+919714152259";
-    var bio = "Admin";
-    var country = "India";
-    var cityState = "Surat, Gujarat";
-    var postalCode = "395003";
-    var taxId = "GSTIN1234567";
+    var emp = ViewBag.Emp as RI_7030.Models.Employee;
+    var T   = ViewBag.T as Dictionary<string, string> ?? new();
+    var lang = ViewBag.Lang as string ?? "en";
+    string Tr(string k) => T.TryGetValue(k, out var v) ? v : k;
 }
 
 <style>
-    .profile-page {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px 0;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .prof-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #1a1a2e;
-        margin-bottom: 24px;
-    }
-
-    .prof-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 24px 32px;
-        box-shadow: 0 4px 20px rgba(0,0,0,.04);
-        margin-bottom: 24px;
-        position: relative;
-    }
-
-    .prof-header {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .prof-avatar {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: #3996b8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        font-weight: 700;
-        color: #fff;
-    }
-
-    .prof-info h4 {
-        margin: 0 0 4px;
-        font-size: 16px;
-        font-weight: 700;
-        color: #1a1a2e;
-        text-transform: uppercase;
-    }
-
-    .prof-info .sub {
-        font-size: 12px;
-        color: #666;
-        margin-bottom: 2px;
-    }
-
-    .edit-btn {
-        position: absolute;
-        top: 24px;
-        right: 32px;
-        background: #fff;
-        color: #555;
-        border: 1px solid #dde4ec;
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: background .2s;
-    }
-    .edit-btn:hover { background: #f4f6fb; }
-
-    .sec-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: #1a1a2e;
-        margin-bottom: 20px;
-    }
-
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-
-    .detail-item {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-    .detail-item label {
-        font-size: 11px;
-        font-weight: 500;
-        color: #888;
-    }
-    .detail-item .val {
-        font-size: 13px;
-        font-weight: 600;
-        color: #1a1a2e;
-    }
-
-    @@media (max-width: 600px) {
-        .detail-grid { grid-template-columns: 1fr; }
-    }
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @@media (max-width: 800px) { .profile-grid { grid-template-columns: 1fr; } }
+    .profile-card { background: #fff; border-radius: 12px; padding: 28px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.07); }
+    .profile-card h6 { font-size: 13px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .6px; margin: 0 0 20px; }
+    .avatar-ring { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg,#2b8bbd,#1a6d99); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: #fff; margin: 0 auto 16px; box-shadow: 0 6px 20px rgba(43,139,189,.3); }
+    .profile-name { font-size: 20px; font-weight: 700; color: #1a1a2e; text-align: center; }
+    .profile-role { text-align: center; margin-top: 6px; }
+    .role-badge { display: inline-block; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; background: linear-gradient(135deg,#2b8bbd,#1a6d99); color: #fff; }
+    .info-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; font-size: 13px; }
+    .info-lbl { font-weight: 700; color: #888; width: 110px; flex-shrink: 0; font-size: 11px; text-transform: uppercase; }
+    .info-val { color: #1a1a2e; font-weight: 500; }
+    .fg { margin-bottom: 14px; }
+    .fg label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #777; margin-bottom: 6px; }
+    .fg input, .fg textarea { width: 100%; padding: 9px 13px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 13px; background: #fff; color: #333; outline: none; box-sizing: border-box; }
+    .fg input:focus, .fg textarea:focus { border-color: #2b8bbd; }
+    .fg textarea { resize: vertical; min-height: 70px; }
+    .btn-save { background: linear-gradient(135deg,#2b8bbd,#1a6d99); color: #fff; border: none; padding: 9px 28px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 3px 10px rgba(43,139,189,.25); }
+    .btn-save:hover { transform: translateY(-1px); }
+    .alert-success { background: #d1f5e0; color: #155724; padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
+    .alert-danger  { background: #fdecea; color: #842029; padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
+    .pw-toggle { position: relative; }
+    .pw-toggle input { padding-right: 40px; }
+    .pw-toggle .eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999; font-size: 16px; user-select: none; }
+    .lang-toggle { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1.5px solid #dde1e7; margin-top: 8px; }
+    .lang-btn { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: #f8f9fb; color: #666; transition: all .2s; font-family: 'Inter', sans-serif; }
+    .lang-btn.active { background: linear-gradient(135deg,#2b8bbd,#1a6d99); color: #fff; }
+    .lang-btn:hover:not(.active) { background: #eef5fa; }
 </style>
 
-<div class="profile-page">
-    <div class="prof-title">My Profile</div>
+@if (TempData["Success"] != null)
+{ <div class="alert-success">✓ @TempData["Success"]</div> }
 
-    <!-- Header Card -->
-    <div class="prof-card">
-        <a href="#" class="edit-btn">Edit ✏</a>
-        <div class="prof-header">
-            <div class="prof-avatar">@initials</div>
-            <div class="prof-info">
-                <h4>@fullName</h4>
-                <div class="sub">@role</div>
-                <div class="sub">@location</div>
+@if (TempData["PasswordError"] != null)
+{ <div class="alert-danger">✗ @TempData["PasswordError"]</div> }
+
+<div class="profile-grid">
+
+    <!-- Left column: Profile overview + Personal info -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+
+        <!-- Profile Header -->
+        <div class="profile-card" style="text-align:center;">
+            @{
+                var initials = string.Join("", (Model?.FullName ?? "U").Split(' ').Take(2).Select(w => w[0])).ToUpper();
+            }
+            <div class="avatar-ring">@initials</div>
+            <div class="profile-name">@(Model?.FullName ?? "—")</div>
+            <div class="profile-role"><span class="role-badge">@(Model?.Role ?? "Employee")</span></div>
+            @if (emp != null)
+            {
+                <div style="margin-top:12px; font-size:12px; color:#888;">
+                    <strong>@emp.EmployeeId</strong> · @(emp.Department ?? "—")
+                </div>
+            }
+        </div>
+
+        <!-- Personal Info (read) -->
+        <div class="profile-card">
+            <h6>@Tr("personal_info")</h6>
+            <div class="info-row"><span class="info-lbl">@Tr("email")</span><span class="info-val">@(Model?.Email ?? "—")</span></div>
+            <div class="info-row"><span class="info-lbl">@Tr("phone")</span><span class="info-val">@(Model?.Phone ?? "—")</span></div>
+            <div class="info-row"><span class="info-lbl">@Tr("bio")</span><span class="info-val">@(Model?.Bio ?? "—")</span></div>
+            <div class="info-row"><span class="info-lbl">@Tr("tax_id")</span><span class="info-val">@(Model?.TaxId ?? "—")</span></div>
+            @if (emp != null)
+            {
+                <div class="info-row"><span class="info-lbl">@Tr("salary")</span><span class="info-val">₹@emp.Salary.ToString("N0")@Tr("month")</span></div>
+                <div class="info-row"><span class="info-lbl">@Tr("joined")</span><span class="info-val">@emp.CreatedAt.ToString("dd MMM yyyy")</span></div>
+            }
+        </div>
+
+        <!-- Language Toggle -->
+        <div class="profile-card">
+            <h6>@Tr("language")</h6>
+            <div class="lang-toggle">
+                <form method="post" action="/Profile/SetLanguage" style="flex:1;display:flex;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="lang" value="en" />
+                    <button type="submit" class="lang-btn @(lang == "en" ? "active" : "")">🇬🇧 English</button>
+                </form>
+                <form method="post" action="/Profile/SetLanguage" style="flex:1;display:flex;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="lang" value="gu" />
+                    <button type="submit" class="lang-btn @(lang == "gu" ? "active" : "")">🇮🇳 ગુજરાતી</button>
+                </form>
             </div>
         </div>
+
     </div>
 
-    <!-- Personal Info Card -->
-    <div class="prof-card">
-        <a href="#" class="edit-btn">Edit ✏</a>
-        <div class="sec-title">Personal Information</div>
-        <div class="detail-grid">
-            <div class="detail-item">
-                <label>First Name</label>
-                <div class="val">@fname</div>
-            </div>
-            <div class="detail-item">
-                <label>Last Name</label>
-                <div class="val">@lname</div>
-            </div>
-            <div class="detail-item">
-                <label>Email address</label>
-                <div class="val">@email</div>
-            </div>
-            <div class="detail-item">
-                <label>Phone</label>
-                <div class="val">@phone</div>
-            </div>
-            <div class="detail-item" style="grid-column: 1 / -1;">
-                <label>Bio</label>
-                <div class="val">@bio</div>
-            </div>
-        </div>
-    </div>
+    <!-- Right column: Edit forms -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
 
-    <!-- Address Card -->
-    <div class="prof-card">
-        <a href="#" class="edit-btn">Edit ✏</a>
-        <div class="sec-title">Address</div>
-        <div class="detail-grid">
-            <div class="detail-item">
-                <label>Country</label>
-                <div class="val">@country</div>
-            </div>
-            <div class="detail-item">
-                <label>City / State</label>
-                <div class="val">@cityState</div>
-            </div>
-            <div class="detail-item">
-                <label>Postal Code</label>
-                <div class="val">@postalCode</div>
-            </div>
-            <div class="detail-item">
-                <label>TAX ID</label>
-                <div class="val">@taxId</div>
-            </div>
+        <!-- Edit Profile Form -->
+        <div class="profile-card">
+            <h6>@Tr("edit_profile")</h6>
+            <form method="post" action="/Profile/Update">
+                @Html.AntiForgeryToken()
+                <div class="fg"><label>@Tr("full_name")</label><input name="fullName" type="text" value="@Model?.FullName" required /></div>
+                <div class="fg"><label>@Tr("phone")</label><input name="phone" type="text" value="@Model?.Phone" /></div>
+                <div class="fg"><label>@Tr("bio")</label><textarea name="bio">@Model?.Bio</textarea></div>
+                <div class="fg"><label>@Tr("tax_pan")</label><input name="taxId" type="text" value="@Model?.TaxId" /></div>
+                <div class="fg"><label>@Tr("country")</label><input name="country" type="text" value="@Model?.Country" /></div>
+                <div class="fg"><label>@Tr("city_state")</label><input name="cityState" type="text" value="@Model?.CityState" /></div>
+                <div class="fg"><label>@Tr("postal_code")</label><input name="postalCode" type="text" value="@Model?.PostalCode" /></div>
+                <div class="fg"><label>@Tr("address")</label><textarea name="address">@Model?.Address</textarea></div>
+                <button type="submit" class="btn-save">@Tr("save_changes")</button>
+            </form>
         </div>
+
+        <!-- Change Password -->
+        <div class="profile-card">
+            <h6>@Tr("change_password")</h6>
+            <form method="post" action="/Profile/ChangePassword">
+                @Html.AntiForgeryToken()
+                <div class="fg pw-toggle">
+                    <label>@Tr("current_password")</label>
+                    <input name="currentPassword" type="password" id="cp" required />
+                    <span class="eye" onclick="toggle('cp')">👁</span>
+                </div>
+                <div class="fg pw-toggle">
+                    <label>@Tr("new_password")</label>
+                    <input name="newPassword" type="password" id="np" required />
+                    <span class="eye" onclick="toggle('np')">👁</span>
+                </div>
+                <div class="fg pw-toggle">
+                    <label>@Tr("confirm_password")</label>
+                    <input name="confirmPassword" type="password" id="cnp" required />
+                    <span class="eye" onclick="toggle('cnp')">👁</span>
+                </div>
+                <button type="submit" class="btn-save">@Tr("change_password")</button>
+            </form>
+        </div>
+
     </div>
 
 </div>
+
+<script>
+    function toggle(id) {
+        const el = document.getElementById(id);
+        el.type = el.type === 'password' ? 'text' : 'password';
+    }
+</script>

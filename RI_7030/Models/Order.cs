@@ -3,107 +3,65 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RI_7030.Models
 {
-    public enum OrderStatus
-    {
-        Pending,
-        InProduction,
-        ReadyToDispatch,
-        Delivered,
-        Cancelled
-    }
-
+    /// <summary>
+    /// Customer order — RI_2001, RI_2002, ...
+    /// Status: Pending | In Production | Ready | Delivered
+    /// </summary>
     public class Order
     {
         [Key]
-        public int OrderId { get; set; }
+        [StringLength(20)]
+        public string OrderId { get; set; } = string.Empty;
 
-        // ── Customer ────────────────────────────────────
-        [Required(ErrorMessage = "Customer name is required.")]
+        [Required]
         [StringLength(150)]
-        [Display(Name = "Customer Name")]
         public string CustomerName { get; set; } = string.Empty;
 
-        [EmailAddress]
-        [StringLength(200)]
-        [Display(Name = "Customer Email")]
-        public string? CustomerEmail { get; set; }
-
-        [Phone]
-        [Display(Name = "Customer Phone")]
-        public string? CustomerPhone { get; set; }
-
-        // ── Product ──────────────────────────────────────
-        [Required(ErrorMessage = "Product is required.")]
         [StringLength(150)]
-        [Display(Name = "Product Name")]
-        public string ProductName { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
+        [StringLength(20)]
+        public string? ProductId { get; set; }
+
+        [StringLength(150)]
+        public string? ProductName { get; set; }
+
+        [Range(1, int.MaxValue)]
         public int Quantity { get; set; }
 
-        [Required]
-        [Range(0, 10_000_000)]
-        [Display(Name = "Unit Price (₹)")]
-        [DataType(DataType.Currency)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal UnitPrice { get; set; }
 
-        [NotMapped]
-        [Display(Name = "Total Amount")]
-        public decimal TotalAmount => Quantity * UnitPrice;
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalAmount { get; set; }
 
-        // ── Dates ────────────────────────────────────────
-        [Display(Name = "Order Date")]
-        [DataType(DataType.Date)]
-        public DateTime OrderDate { get; set; } = DateTime.Now;
-
-        [Required]
-        [Display(Name = "Due Date")]
-        [DataType(DataType.Date)]
         public DateTime DueDate { get; set; }
 
-        // ── Status ───────────────────────────────────────
-        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        /// <summary>Pending | In Production | Ready | Delivered</summary>
+        [StringLength(30)]
+        public string Status { get; set; } = "Pending";
 
-        [StringLength(500)]
-        public string? Notes { get; set; }
+        // ── Production stage flags (C/F/G/P) ───────────────────────
+        public bool Stage_C { get; set; }
+        public bool Stage_F { get; set; }
+        public bool Stage_G { get; set; }
+        public bool Stage_P { get; set; }
 
-        // ── Production Stage Completion ──────────────────
-        // Each stage matches an EmployeeType
-        [Display(Name = "Casting Done")]
-        public bool IsCastingDone { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        [Display(Name = "Finishing Touch Done")]
-        public bool IsFinishingTouchDone { get; set; } = false;
-
-        [Display(Name = "Gold Plating Done")]
-        public bool IsGoldPlatingDone { get; set; } = false;
-
-        [Display(Name = "Packaging Done")]
-        public bool IsPackagingDone { get; set; } = false;
-
-        // ── Computed ─────────────────────────────────────
+        // ── Computed ────────────────────────────────────────────────
         [NotMapped]
         public int CompletedStages =>
-            (IsCastingDone        ? 1 : 0) +
-            (IsFinishingTouchDone ? 1 : 0) +
-            (IsGoldPlatingDone    ? 1 : 0) +
-            (IsPackagingDone      ? 1 : 0);
+            (Stage_C ? 1 : 0) +
+            (Stage_F ? 1 : 0) +
+            (Stage_G ? 1 : 0) +
+            (Stage_P ? 1 : 0);
 
         [NotMapped]
-        public int CompletionPercentage => CompletedStages * 25;
+        public int Progress => CompletedStages * 25;
 
         [NotMapped]
-        public string CurrentStageLabel => CompletedStages switch
-        {
-            0 => "Stage 1 – Casting",
-            1 => "Stage 2 – Finishing Touch",
-            2 => "Stage 3 – Gold Plating",
-            3 => "Stage 4 – Packaging",
-            _ => "Complete ✔"
-        };
-
-        [NotMapped]
-        public bool IsOverdue => DueDate.Date < DateTime.Today && Status != OrderStatus.Delivered && Status != OrderStatus.Cancelled;
+        public bool IsOverdue =>
+            DueDate.Date < DateTime.Today && Status != "Delivered";
     }
 }

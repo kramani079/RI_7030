@@ -2,43 +2,38 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RI_7030.Models
 {
-    public enum EmployeeType
-    {
-        Casting = 1,
-        FinishingTouch = 2,
-        GoldPlating = 3,
-        Packaging = 4
-    }
-
+    /// <summary>
+    /// Employee record — string PK: RI_4001, RI_4002, ...
+    /// UserId links to a User account (nullable).
+    /// </summary>
     public class Employee
     {
-        public int EmployeeId { get; set; }
+        [Key]
+        [StringLength(20)]
+        public string EmployeeId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Employee name is required.")]
         [StringLength(150)]
-        [Display(Name = "Employee Name")]
-        public string EmployeeName { get; set; } = string.Empty;
+        [Display(Name = "Full Name")]
+        public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Enter a valid email address.")]
-        [Display(Name = "Email ID")]
+        [EmailAddress]
+        [StringLength(150)]
+        [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Employee type is required.")]
-        [Display(Name = "Type of Employee")]
-        public EmployeeType EmployeeType { get; set; }
+        /// <summary>Casting | Finishing Touch | Gold Plating | Packaging</summary>
+        [StringLength(50)]
+        [Display(Name = "Department")]
+        public string? Department { get; set; }
 
-        [Required(ErrorMessage = "Salary is required.")]
-        [Range(0, 10_000_000, ErrorMessage = "Enter a valid salary.")]
-        [DataType(DataType.Currency)]
+        [Range(0, 10_000_000)]
         public decimal Salary { get; set; }
 
-        [Phone]
-        [Display(Name = "Mobile No.")]
-        public string? Phone { get; set; }
+        /// <summary>Foreign key to Users table (nullable — employee may or may not have login)</summary>
+        public int? UserId { get; set; }
 
-        [DataType(DataType.Date)]
-        [Display(Name = "Date of Joining")]
-        public DateTime DateOfJoining { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

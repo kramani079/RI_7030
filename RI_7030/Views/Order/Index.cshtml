@@ -1,469 +1,289 @@
+@model List<RI_7030.Models.Order>
 @{
     ViewData["Title"] = "Orders";
+    var isAdmin = Context.Session.GetString("Role") == "Admin";
+    var filter  = ViewBag.Filter as string ?? "All";
+    var search  = ViewBag.Search as string ?? "";
+    var nextId  = ViewBag.NextId as string ?? "";
+    var products = ViewBag.Products as List<RI_7030.Models.Product> ?? new();
+    var T  = ViewBag.T as Dictionary<string, string> ?? new();
+    string Tr(string k) => T.TryGetValue(k, out var v) ? v : k;
 }
 
 <style>
     .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
     .page-header h5 { margin:0; font-size:18px; font-weight:700; color:#1a1a2e; }
-
-    .btn-primary-sm {
-        background:#4a8dac; color:#fff; border:none; padding:8px 20px;
-        border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;
-        text-decoration:none; display:inline-flex; align-items:center; gap:6px;
-    }
-    .btn-primary-sm:hover { background:#3a7a98; color:#fff; }
-
+    .btn-primary-sm { background:linear-gradient(135deg,#2b8bbd,#1a6d99); color:#fff; border:none; padding:9px 20px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(43,139,189,.25); }
     .search-bar { display:flex; gap:10px; margin-bottom:18px; }
-    .search-bar input {
-        flex:1; padding:8px 14px; border:1px solid #ddd; border-radius:8px;
-        font-size:13px; background:#f9f9fb; outline:none;
-    }
-    .search-bar input:focus { border-color:#4a8dac; }
-
-    /* Filter tabs */
+    .search-bar input { flex:1; padding:9px 14px; border:1.5px solid #e0e6ed; border-radius:8px; font-size:13px; background:#f8f9fb; outline:none; }
+    .search-bar input:focus { border-color:#2b8bbd; background:#fff; }
     .filter-tabs { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
-    .ftab {
-        padding:5px 14px; border-radius:20px; font-size:12px; font-weight:600;
-        border:1.5px solid #e0e6ed; background:#fff; color:#666; cursor:pointer; text-decoration:none;
-        transition: all .15s;
-    }
-    .ftab:hover, .ftab.active { background:#4a8dac; color:#fff; border-color:#4a8dac; }
-    .ftab.all    { border-color:#4a8dac; }
-    .ftab.pending { border-color:#f39c12; }
-    .ftab.prod   { border-color:#3498db; }
-    .ftab.ready  { border-color:#27ae60; }
-    .ftab.done   { border-color:#aaa; }
-
-    /* Table */
-    .order-table { width:100%; border-collapse:collapse; font-size:13px; }
-    .order-table thead th {
-        background:#f0f4f8; padding:10px 14px; text-align:left;
-        font-weight:700; color:#555; border-bottom:2px solid #e0e6ed;
-    }
-    .order-table tbody td {
-        padding:11px 14px; border-bottom:1px solid #f0f0f0;
-        color:#333; vertical-align:middle;
-    }
-    .order-table tbody tr:hover { background:#f7fafc; }
-
-    /* Progress bar */
+    .ftab { padding:6px 16px; border-radius:20px; font-size:12px; font-weight:600; border:1.5px solid #e0e6ed; background:#fff; color:#666; cursor:pointer; text-decoration:none; transition:all .2s; }
+    .ftab:hover, .ftab.active { background:linear-gradient(135deg,#2b8bbd,#1a6d99); color:#fff; border-color:#2b8bbd; }
+    .ord-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .ord-table thead th { background:#f4f7fb; padding:11px 14px; text-align:left; font-weight:700; color:#666; border-bottom:2px solid #e4e9f0; font-size:11px; text-transform:uppercase; letter-spacing:.4px; }
+    .ord-table tbody td { padding:12px 14px; border-bottom:1px solid #f2f4f7; color:#333; vertical-align:middle; }
+    .ord-table tbody tr:hover { background:#f7fafd; }
+    .stage-dots { display:flex; gap:4px; align-items:center; }
+    .sdot { width:22px; height:22px; border-radius:50%; font-size:9px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:center; }
+    .sdot-done { background:#27ae60; } .sdot-pending { background:#ddd; color:#999; }
     .prog-wrap { display:flex; align-items:center; gap:8px; }
-    .prog-bg { background:#eee; border-radius:20px; height:7px; width:80px; overflow:hidden; }
+    .prog-bg { background:#e8ecf1; border-radius:20px; height:8px; width:90px; overflow:hidden; }
     .prog-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,#3498db,#27ae60); }
-    .prog-pct { font-size:11px; font-weight:700; color:#555; }
-
-    /* Stage dots */
-    .stage-dots { display:flex; gap:4px; }
-    .sdot {
-        width:18px; height:18px; border-radius:50%;
-        font-size:8px; font-weight:700; color:#fff;
-        display:flex; align-items:center; justify-content:center;
-    }
-    .sdot-done    { background:#27ae60; }
-    .sdot-pending { background:#ddd; color:#999; }
-
-    /* Status badges */
-    .badge { display:inline-block; padding:3px 11px; border-radius:20px; font-size:11px; font-weight:700; }
-    .badge-pending  { background:#fff8e1; color:#856404; }
-    .badge-prod     { background:#e8f4fd; color:#2980b9; }
-    .badge-ready    { background:#eafaf1; color:#1e8449; }
-    .badge-delivered{ background:#e8f4fd; color:#555; }
-    .badge-cancelled{ background:#fdecea; color:#842029; }
-    .badge-overdue  { background:#fdecea; color:#c0392b; }
-
-    /* Action btns */
-    .action-btn { padding:4px 12px; border-radius:6px; font-size:11px; font-weight:600; border:none; cursor:pointer; text-decoration:none; }
-    .btn-view   { background:#eaf4fb; color:#2980b9; }
-    .btn-edit   { background:#f9f9fb; color:#555; margin-left:4px; }
+    .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }
+    .badge-pending { background:#fff8e1; color:#856404; } .badge-prod { background:#e8f4fd; color:#2980b9; }
+    .badge-ready { background:#eafaf1; color:#1e8449; } .badge-delivered { background:#f0f1f3; color:#555; }
+    .badge-overdue { background:#fdecea; color:#c0392b; }
+    .action-btn { padding:4px 12px; border-radius:6px; font-size:11px; font-weight:600; border:none; cursor:pointer; text-decoration:none; display:inline-block; }
+    .btn-view { background:#eaf4fb; color:#2980b9; } .btn-edit { background:#f9f9fb; color:#555; margin-left:4px; }
     .btn-delete { background:#fdedec; color:#c0392b; margin-left:4px; }
-
-    /* Success toast */
-    .toast-success {
-        background:#d1f5e0; color:#155724; padding:10px 16px;
-        border-radius:8px; margin-bottom:16px; font-size:13px; font-weight:600;
-    }
-
-    /* Floating add */
-    .floating-add {
-        position:fixed; bottom:36px; right:36px;
-        background:#4a8dac; color:#fff; width:50px; height:50px;
-        border-radius:50%; font-size:26px;
-        display:flex; align-items:center; justify-content:center;
-        box-shadow:0 6px 18px rgba(74,141,172,.4);
-        text-decoration:none; transition:transform .2s;
-    }
-    .floating-add:hover { transform:scale(1.1); color:#fff; }
+    .btn-dispatch { background:#1e8449; color:#fff; margin-left:0; font-weight:700; padding:5px 14px; border-radius:6px; font-size:11px; border:none; cursor:pointer; box-shadow:0 2px 6px rgba(30,132,73,.25); transition:all .15s; }
+    .btn-dispatch:hover { background:#27ae60; transform:translateY(-1px); }
+    .empty-state { text-align:center; color:#bbb; padding:40px; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:16px; padding:32px 36px; width:100%; max-width:520px; box-shadow:0 12px 48px rgba(0,0,0,.18); animation:slideUp .2s ease; }
+    @@keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    .modal-title { font-size:17px; font-weight:800; color:#1a1a2e; margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; }
+    .modal-close { background:none; border:none; font-size:20px; color:#999; cursor:pointer; }
+    .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .mfg { display:flex; flex-direction:column; }
+    .mfg label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#777; margin-bottom:5px; }
+    .mfg input, .mfg select { width:100%; padding:9px 13px; border:1.5px solid #dde1e7; border-radius:8px; font-size:13px; background:#fff; color:#333; outline:none; box-sizing:border-box; }
+    .mfg input:focus { border-color:#2b8bbd; } .mfg input[readonly] { background:#eef5fa; color:#2b8bbd; font-weight:600; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; }
+    .btn-cancel { padding:9px 24px; border-radius:8px; font-size:13px; font-weight:600; background:#fff; color:#555; border:1.5px solid #dde1e7; cursor:pointer; }
+    .btn-action { padding:9px 24px; border-radius:8px; font-size:13px; font-weight:600; background:#39a0c8; color:#fff; border:none; cursor:pointer; }
+    .stages-row { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; font-weight:600; color:#444; }
+    .stages-row label { display:flex; align-items:center; gap:5px; }
+    .view-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; }
+    .view-grid .vl { font-weight:700; color:#888; font-size:11px; text-transform:uppercase; }
+    .view-grid .vv { color:#1a1a2e; font-weight:600; margin-bottom:10px; }
 </style>
 
 <div class="card-box">
     <div class="page-header">
-        <h5>📋 Orders</h5>
-        <a href="/Order/Create" class="btn-primary-sm">＋ New Order</a>
+        <h5>@Tr("orders_title")</h5>
     </div>
 
-    @if (TempData["OrderSuccess"] != null)
+    <form method="get" class="search-bar">
+        <input name="search" type="text" value="@search" placeholder="@Tr("search_orders")" />
+        <button type="submit" class="btn-primary-sm">@Tr("search")</button>
+    </form>
+
+    <div class="filter-tabs">
+        <a href="/Order" class="ftab @(filter == "All" ? "active" : "")">@Tr("s_all")</a>
+        <a href="/Order?filter=Pending" class="ftab @(filter == "Pending" ? "active" : "")">📝 @Tr("s_pending")</a>
+        <a href="/Order?filter=In Production" class="ftab @(filter == "In Production" ? "active" : "")">🔧 @Tr("s_in_production")</a>
+        <a href="/Order?filter=Ready" class="ftab @(filter == "Ready" ? "active" : "")">✅ @Tr("s_ready")</a>
+        <a href="/Order?filter=Delivered" class="ftab @(filter == "Delivered" ? "active" : "")">🔴 @Tr("s_delivered")</a>
+    </div>
+
+    @if (Model == null || !Model.Any())
     {
-        <div class="toast-success">✔ @TempData["OrderSuccess"]</div>
+        <div class="empty-state">@Tr("no_orders")</div>
+    }
+    else
+    {
+        <table class="ord-table" id="ordTable">
+            <thead>
+                <tr>
+                    <th>@Tr("order_id")</th><th>@Tr("customer")</th><th>@Tr("product")</th><th>@Tr("qty")</th>
+                    <th>@Tr("amount")</th><th>@Tr("due_date")</th><th>@Tr("production")</th><th>@Tr("status")</th><th>@Tr("actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    var prog = o.Progress;
+                    var pColor = prog >= 100 ? "#27ae60" : prog >= 50 ? "#f39c12" : "#3498db";
+                    var badgeCls = o.Status switch { "Pending" => "badge-pending", "In Production" => "badge-prod", "Ready" => "badge-ready", "Delivered" => "badge-delivered", _ => "badge-pending" };
+                    if (o.IsOverdue && o.Status != "Delivered") { badgeCls = "badge-overdue"; }
+                    <tr>
+                        <td><strong>#@o.OrderId</strong></td>
+                        <td>
+                            <div>@o.CustomerName</div>
+                            <div style="font-size:11px;color:#999;">@(o.Email ?? "")</div>
+                        </td>
+                        <td>@(o.ProductName ?? "—")</td>
+                        <td>@o.Quantity</td>
+                        <td>₹@o.TotalAmount.ToString("N0")</td>
+                        <td style="color:@(o.IsOverdue ? "#e74c3c" : "#333")">@o.DueDate.ToString("MMM d, yyyy") @(o.IsOverdue && o.Status != "Delivered" ? "⚠" : "")</td>
+                        <td>
+                            <div class="prog-wrap">
+                                <div class="prog-bg"><div class="prog-fill" style="width:@(prog)%"></div></div>
+                                <span style="font-size:11px;font-weight:700;color:@pColor">@(prog)%</span>
+                            </div>
+                            <div class="stage-dots" style="margin-top:4px;">
+                                <div class="sdot @(o.Stage_C ? "sdot-done" : "sdot-pending")" title="@Tr("casting")">C</div>
+                                <div class="sdot @(o.Stage_F ? "sdot-done" : "sdot-pending")" title="@Tr("finishing")">F</div>
+                                <div class="sdot @(o.Stage_G ? "sdot-done" : "sdot-pending")" title="@Tr("gold_plating")">G</div>
+                                <div class="sdot @(o.Stage_P ? "sdot-done" : "sdot-pending")" title="@Tr("packaging")">P</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge @badgeCls">@(o.IsOverdue && o.Status != "Delivered" ? (ViewBag.Lang == "gu" ? "ઓવરડ્યુ" : "Overdue") : o.Status)</span>
+                        </td>
+                        <td>
+                            @if (isAdmin && o.Status != "Delivered")
+                            {
+                                <form method="post" action="/Order/Dispatch/@o.OrderId" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-dispatch" onclick="return confirm('@Tr("dispatch_confirm")')">@Tr("dispatch")</button>
+                                </form>
+                            }
+                            <button class="action-btn btn-view" onclick="openViewModal('@o.OrderId','@o.CustomerName','@(o.Email ?? "")','@(o.ProductName ?? "")','@(o.ProductId ?? "")','@o.Quantity','@o.UnitPrice.ToString("N0")','@o.TotalAmount.ToString("N0")','@o.DueDate.ToString("dd MMM yyyy")','@o.Status')">@Tr("view")</button>
+                            @if (isAdmin)
+                            {
+                                <button class="action-btn btn-edit" onclick="openEditModal('@o.OrderId','@o.CustomerName','@(o.Email ?? "")','@(o.ProductId ?? "")','@o.Quantity','@o.UnitPrice','@o.DueDate.ToString("yyyy-MM-dd")','@o.Status','@o.Stage_C.ToString().ToLower()','@o.Stage_F.ToString().ToLower()','@o.Stage_G.ToString().ToLower()','@o.Stage_P.ToString().ToLower()')">@Tr("edit")</button>
+                                <form method="post" action="/Order/Delete/@o.OrderId" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="action-btn btn-delete" onclick="return confirm('@Tr("delete_confirm")')">@Tr("del")</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     }
 
-    <div class="search-bar">
-        <input type="text" id="orderSearch" placeholder="🔍 Search by customer, product, order ID…" oninput="filterOrders()" />
-    </div>
-
-    <!-- Filter tabs -->
-    <div class="filter-tabs">
-        <a href="#" class="ftab all active"    onclick="filterStatus('all', this)">All</a>
-        <a href="#" class="ftab pending"       onclick="filterStatus('Pending', this)">⏳ Pending</a>
-        <a href="#" class="ftab prod"          onclick="filterStatus('InProduction', this)">🔧 In Production</a>
-        <a href="#" class="ftab ready"         onclick="filterStatus('Ready', this)">✔ Ready</a>
-        <a href="#" class="ftab done"          onclick="filterStatus('Delivered', this)">📦 Delivered</a>
-    </div>
-
-    <table class="order-table" id="orderTable">
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Product</th>
-                <th>Qty</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Production</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr data-status="InProduction">
-                <td><strong>#ORD-101</strong></td>
-                <td>
-                    <div>Mahesh Patel</div>
-                    <small style="color:#aaa;">mahesh@gmail.com</small>
-                </td>
-                <td>Gold Chain</td>
-                <td>50</td>
-                <td>₹2,50,000</td>
-                <td style="color:#e74c3c;font-weight:600;">Feb 28, 2026</td>
-                <td>
-                    <div class="prog-wrap">
-                        <div class="prog-bg"><div class="prog-fill" style="width:75%"></div></div>
-                        <span class="prog-pct">75%</span>
-                    </div>
-                    <div class="stage-dots" style="margin-top:4px;">
-                        <div class="sdot sdot-done" title="Casting">C</div>
-                        <div class="sdot sdot-done" title="Finishing">F</div>
-                        <div class="sdot sdot-done" title="Gold Plating">G</div>
-                        <div class="sdot sdot-pending" title="Packaging">P</div>
-                    </div>
-                </td>
-                <td><span class="badge badge-prod">In Production</span></td>
-                <td>
-                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2001', 'Mahesh Patel', 'mahesh@gmail.com', 'Gold Chain', 'RI_1002', 50, 5000, 250000, 'Feb 28, 2026', 'In Production', '75%')">View</button>
-                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2001', 'Mahesh Patel', 'mahesh@gmail.com', 'RI_1002', 'Gold Chain', 50, 5000, 250000, '2026-02-28', 'InProduction')">Edit</button>
-                    <a href="/Order/Delete/1"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
-                </td>
-            </tr>
-            <tr data-status="InProduction">
-                <td><strong>#ORD-102</strong></td>
-                <td>
-                    <div>Ramesh Jewellers</div>
-                    <small style="color:#aaa;">ramesh@jewellers.com</small>
-                </td>
-                <td>Ring Set</td>
-                <td>30</td>
-                <td>₹90,000</td>
-                <td>Mar 2, 2026</td>
-                <td>
-                    <div class="prog-wrap">
-                        <div class="prog-bg"><div class="prog-fill" style="width:50%"></div></div>
-                        <span class="prog-pct">50%</span>
-                    </div>
-                    <div class="stage-dots" style="margin-top:4px;">
-                        <div class="sdot sdot-done" title="Casting">C</div>
-                        <div class="sdot sdot-done" title="Finishing">F</div>
-                        <div class="sdot sdot-pending" title="Gold Plating">G</div>
-                        <div class="sdot sdot-pending" title="Packaging">P</div>
-                    </div>
-                </td>
-                <td><span class="badge badge-prod">In Production</span></td>
-                <td>
-                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2002', 'Ramesh Jewellers', 'ramesh@jewellers.com', 'Ring Set', 'RI_1003', 30, 3000, 90000, 'Mar 2, 2026', 'In Production', '50%')">View</button>
-                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2002', 'Ramesh Jewellers', 'ramesh@jewellers.com', 'RI_1003', 'Ring Set', 30, 3000, 90000, '2026-03-02', 'InProduction')">Edit</button>
-                    <a href="/Order/Delete/2"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
-                </td>
-            </tr>
-            <tr data-status="Pending">
-                <td><strong>#ORD-103</strong></td>
-                <td>
-                    <div>Vijay Exports</div>
-                    <small style="color:#aaa;">vijay@exports.com</small>
-                </td>
-                <td>Necklace</td>
-                <td>20</td>
-                <td>₹1,20,000</td>
-                <td>Mar 5, 2026</td>
-                <td>
-                    <div class="prog-wrap">
-                        <div class="prog-bg"><div class="prog-fill" style="width:25%"></div></div>
-                        <span class="prog-pct">25%</span>
-                    </div>
-                    <div class="stage-dots" style="margin-top:4px;">
-                        <div class="sdot sdot-done" title="Casting">C</div>
-                        <div class="sdot sdot-pending" title="Finishing">F</div>
-                        <div class="sdot sdot-pending" title="Gold Plating">G</div>
-                        <div class="sdot sdot-pending" title="Packaging">P</div>
-                    </div>
-                </td>
-                <td><span class="badge badge-pending">Pending</span></td>
-                <td>
-                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2003', 'Vijay Exports', 'vijay@exports.com', 'Necklace', 'RI_1005', 20, 6000, 120000, 'Mar 5, 2026', 'Pending', '25%')">View</button>
-                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2003', 'Vijay Exports', 'vijay@exports.com', 'RI_1005', 'Necklace', 20, 6000, 120000, '2026-03-05', 'Pending')">Edit</button>
-                    <a href="/Order/Delete/3"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
-                </td>
-            </tr>
-            <tr data-status="Ready">
-                <td><strong>#ORD-104</strong></td>
-                <td>
-                    <div>Anita Stores</div>
-                    <small style="color:#aaa;">anita@stores.com</small>
-                </td>
-                <td>Earrings</td>
-                <td>100</td>
-                <td>₹50,000</td>
-                <td>Mar 7, 2026</td>
-                <td>
-                    <div class="prog-wrap">
-                        <div class="prog-bg"><div class="prog-fill" style="width:100%"></div></div>
-                        <span class="prog-pct">100%</span>
-                    </div>
-                    <div class="stage-dots" style="margin-top:4px;">
-                        <div class="sdot sdot-done" title="Casting">C</div>
-                        <div class="sdot sdot-done" title="Finishing">F</div>
-                        <div class="sdot sdot-done" title="Gold Plating">G</div>
-                        <div class="sdot sdot-done" title="Packaging">P</div>
-                    </div>
-                </td>
-                <td><span class="badge badge-ready">Ready ✔</span></td>
-                <td>
-                    <button class="action-btn btn-view" onclick="openDetailsModal('RI_2004', 'Anita Stores', 'anita@stores.com', 'Earrings', 'RI_1006', 100, 500, 50000, 'Mar 7, 2026', 'Ready', '100%')">View</button>
-                    <button class="action-btn btn-edit" onclick="openEditModal('RI_2004', 'Anita Stores', 'anita@stores.com', 'RI_1006', 'Earrings', 100, 500, 50000, '2026-03-07', 'Ready')">Edit</button>
-                    <a href="/Order/Delete/4"  class="action-btn btn-delete" onclick="return confirm('Delete order?')">Del</a>
-                </td>
-            </tr>
-            <tr data-status="Pending">
-                <td><strong>#ORD-105</strong></td>
-                <td>
-                    <div>Kishan Bros.</div>
-                    <small style="color:#aaa;">kishan@bros.com</small>
-                </td>
-                <td>Gold Bangle</td>
-                <td>150</td>
-                <td>₹75,000</td>
-                <td style="color:#e74c3c;font-weight:600;">Feb 20, 2026 ⚠</td>
-                <td>
-                    <div class="prog-wrap">
-                        <div class="prog-bg"><div class="prog-fill" style="width:0%"></div></div>
-                        <span class="prog-pct">0%</span>
-                    </div>
-                    <div class="stage-dots" style="margin-top:4px;">
-                        <div class="sdot sdot-pending" title="Casting">C</div>
-                        <div class="sdot sdot-pending" title="Finishing">F</div>
-                        <div class="sdot sdot-pending" title="Gold Plating">G</div>
-                        <div class="sdot sdot-pending" title="Packaging">P</div>
-                    </div>
-                </td>
-                <td><span class="badge badge-overdue">Overdue</span></td>
-                <td>
-                    <a href="/Order/Details/5" class="action-btn btn-view">View</a>
-                    <a href="/Order/Edit/5"    class="action-btn btn-edit">Edit</a>
-                    <a href="/Order/Delete/5"  class="action-btn btn-delete" onclick="return confirm('Delete order #ORD-105?')">Del</a>
-                </td>
-            </tr>
-            <tr data-status="Delivered">
-                <td><strong>#ORD-100</strong></td>
-                <td>
-                    <div>Suresh Traders</div>
-                    <small style="color:#aaa;">suresh@traders.com</small>
-                </td>
-                <td>Silver Earrings</td>
-                <td>200</td>
-                <td>₹40,000</td>
-                <td>Feb 15, 2026</td>
-                <td>
-                    <div class="prog-wrap">
-                        <div class="prog-bg"><div class="prog-fill" style="width:100%"></div></div>
-                        <span class="prog-pct">100%</span>
-                    </div>
-                    <div class="stage-dots" style="margin-top:4px;">
-                        <div class="sdot sdot-done">C</div>
-                        <div class="sdot sdot-done">F</div>
-                        <div class="sdot sdot-done">G</div>
-                        <div class="sdot sdot-done">P</div>
-                    </div>
-                </td>
-                <td><span class="badge badge-delivered">Delivered</span></td>
-                <td>
-                    <a href="/Order/Details/6" class="action-btn btn-view">View</a>
-                    <a href="/Order/Edit/6"    class="action-btn btn-edit">Edit</a>
-                    <a href="/Order/Delete/6"  class="action-btn btn-delete" onclick="return confirm('Delete order #ORD-100?')">Del</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- Legend -->
-    <div style="margin-top:14px;font-size:11px;color:#aaa;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
-        <span><span style="display:inline-block;width:12px;height:12px;background:#27ae60;border-radius:50%;margin-right:4px;"></span>Done</span>
-        <span><span style="display:inline-block;width:12px;height:12px;background:#ddd;border-radius:50%;margin-right:4px;"></span>Pending</span>
-        <span>C = Casting &nbsp;|&nbsp; F = Finishing &nbsp;|&nbsp; G = Gold Plating &nbsp;|&nbsp; P = Packaging</span>
+    <div style="margin-top:14px;font-size:11px;color:#aaa;display:flex;gap:14px;align-items:center;">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#27ae60;border-radius:50%;margin-right:4px;"></span>@Tr("done")</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#ddd;border-radius:50%;margin-right:4px;"></span>@Tr("s_pending")</span>
+        <span>C=@Tr("casting") | F=@Tr("finishing") | G=@Tr("gold_plating") | P=@Tr("packaging")</span>
     </div>
 </div>
 
-<a href="/Order/Create" class="floating-add" title="New Order">＋</a>
-
-<!-- ── Order Modals Styles ─────────────────────── -->
-<style>
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; }
-    .modal-overlay.open { display: flex; }
-    .modal-box { background: #fff; border-radius: 12px; padding: 32px 40px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,.15); position: relative; animation: slideUp .2s ease; }
-    .modal-box.md-large { max-width: 550px; }
-    .modal-box.md-view { max-width: 440px; }
-    @@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-    .modal-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
-    .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
-    .modal-close:hover { color: #333; }
-
-    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-
-    .mfg { display: flex; flex-direction: column; }
-    .mfg label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #777; margin-bottom: 6px; }
-    .mfg input, .mfg select { width: 100%; padding: 10px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; background: #fff; color: #333; outline: none; transition: border-color .2s; }
-    .mfg input:focus, .mfg select:focus { border-color: #2b8bbd; box-shadow: 0 0 0 3px rgba(43,139,189,.08); }
-    .mfg input[readonly] { background: #eef5fa; color: #2b8bbd; font-weight: 600; border: none; }
-
-    .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
-    .btn-cancel { padding: 9px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; background: #fff; color: #555; border: 1.5px solid #dde1e7; cursor: pointer; transition: background .15s; }
-    .btn-cancel:hover { background: #f4f6fb; }
-    .btn-action { padding: 9px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; background: #39a0c8; color: #fff; border: none; cursor: pointer; transition: background .2s; }
-    .btn-action:hover { background: #2f8aaebb; }
-
-    .det-row { display: flex; align-items: baseline; font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
-    .det-lbl { font-weight: 700; color: #1a1a2e; width: 110px; flex-shrink: 0; }
-    .det-val { color: #333; }
-</style>
-
-<!-- ── Order Details Modal ───────────────────────── -->
-<div class="modal-overlay" id="orderDetailsModal">
-    <div class="modal-box md-view">
+<!-- View Order Modal -->
+<div class="modal-overlay" id="viewModal">
+    <div class="modal-box">
         <div class="modal-title">
-            <span id="vdTitle">Order Details: RI_2001</span>
-            <button class="modal-close" onclick="closeModal('orderDetailsModal')">×</button>
+            <span id="vmTitle">@Tr("order_details")</span>
+            <button class="modal-close" onclick="closeModal('viewModal')">×</button>
         </div>
-        <div>
-            <div class="det-row"><span class="det-lbl">Customer:</span><span class="det-val" id="vdCust">Mahesh Patel</span></div>
-            <div class="det-row"><span class="det-lbl">Email:</span><span class="det-val" id="vdEmail">mahesh@gmail.com</span></div>
-            <div class="det-row"><span class="det-lbl">Product:</span><span class="det-val" id="vdProduct">Gold Chain (RI_1002)</span></div>
-            <div class="det-row"><span class="det-lbl">Quantity:</span><span class="det-val" id="vdQty">50</span></div>
-            <div class="det-row"><span class="det-lbl">Unit Price:</span><span class="det-val" id="vdUp">₹5,000</span></div>
-            <div class="det-row"><span class="det-lbl">Total Amount:</span><span class="det-val" id="vdTotal">₹2,50,000</span></div>
-            <div class="det-row"><span class="det-lbl">Due Date:</span><span class="det-val" id="vdDue">Feb 28, 2026</span></div>
-            <div class="det-row"><span class="det-lbl">Status:</span><span class="det-val" id="vdStatus">In Production</span></div>
-            <div class="det-row"><span class="det-lbl">Progress:</span><span class="det-val" id="vdProg">75%</span></div>
-        </div>
+        <div class="view-grid" id="vmBody"></div>
         <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal('orderDetailsModal')">Close</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('viewModal')">@Tr("close")</button>
         </div>
     </div>
 </div>
 
-<!-- ── Edit Order Modal ──────────────────────────── -->
-<div class="modal-overlay" id="editOrderModal">
-    <div class="modal-box md-large">
-        <div class="modal-title">
-            <span>Edit Order</span>
-            <button class="modal-close" onclick="closeModal('editOrderModal')">×</button>
-        </div>
-        <div class="modal-grid">
-            <div class="mfg"><label>Customer Name</label><input type="text" id="eoCust" /></div>
-            <div class="mfg"><label>Email</label><input type="email" id="eoEmail" /></div>
-            <div class="mfg"><label>Product ID</label><input type="text" id="eoPid" /></div>
-            <div class="mfg"><label>Product Name</label><input type="text" id="eoPname" /></div>
-            <div class="mfg"><label>Quantity</label><input type="number" id="eoQty" oninput="calcEditOrderTotal()" /></div>
-            <div class="mfg"><label>Unit Price (₹)</label><input type="number" id="eoUp" oninput="calcEditOrderTotal()" /></div>
-            <div class="mfg"><label>Total Amount (₹)</label><input type="text" id="eoTotal" readonly /></div>
-            <div class="mfg"><label>Due Date</label><input type="date" id="eoDue" /></div>
-            <div class="mfg" style="grid-column: 1 / -1;"><label>Status</label>
-                <select id="eoStatus">
-                    <option value="Pending">Pending</option>
-                    <option value="InProduction">In Production</option>
-                    <option value="Ready">Ready</option>
-                    <option value="Delivered">Delivered</option>
-                </select>
+<!-- Edit Order Modal -->
+@if (isAdmin)
+{
+    <div class="modal-overlay" id="editOrderModal">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span id="eoTitle">@Tr("edit_order")</span>
+                <button class="modal-close" onclick="closeModal('editOrderModal')">×</button>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal('editOrderModal')">Cancel</button>
-            <button class="btn-action" onclick="closeModal('editOrderModal')">Save Order</button>
+            <form method="post" id="editOrderForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-grid">
+                    <div class="mfg"><label>@Tr("customer_name")</label><input name="customerName" id="eoCustomer" type="text" required /></div>
+                    <div class="mfg"><label>@Tr("email")</label><input name="email" id="eoEmail" type="email" /></div>
+                    <div class="mfg"><label>@Tr("product")</label>
+                        <select name="productId" id="eoProduct">
+                            <option value="">@Tr("select_product")</option>
+                            @foreach (var p in products) { <option value="@p.ProductId">@p.ProductId – @p.Name</option> }
+                        </select>
+                    </div>
+                    <div class="mfg"><label>@Tr("quantity")</label><input name="quantity" id="eoQty" type="number" min="1" required /></div>
+                    <div class="mfg"><label>@Tr("unit_price")</label><input name="unitPrice" id="eoPrice" type="number" min="0" step="0.01" /></div>
+                    <div class="mfg"><label>@Tr("due_date")</label><input name="dueDate" id="eoDue" type="date" required /></div>
+                    <div class="mfg"><label>@Tr("status")</label>
+                        <select name="status" id="eoStatus">
+                            <option value="Pending">@Tr("s_pending")</option>
+                            <option value="In Production">@Tr("s_in_production")</option>
+                            <option value="Ready">@Tr("s_ready")</option>
+                            <option value="Delivered">@Tr("s_delivered")</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mfg" style="margin-bottom:14px;">
+                    <label>@Tr("prod_stages")</label>
+                    <div class="stages-row" style="margin-top:8px;">
+                        <label><input type="checkbox" name="stageC" id="eoC" /> @Tr("casting")</label>
+                        <label><input type="checkbox" name="stageF" id="eoF" /> @Tr("finishing")</label>
+                        <label><input type="checkbox" name="stageG" id="eoG" /> @Tr("gold_plating")</label>
+                        <label><input type="checkbox" name="stageP" id="eoP" /> @Tr("packaging")</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('editOrderModal')">@Tr("cancel")</button>
+                    <button type="submit" class="btn-action">@Tr("save_changes")</button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
+
+    <!-- New Order Modal -->
+    <div class="modal-overlay" id="newOrderModal">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span>@Tr("new_order")</span>
+                <button class="modal-close" onclick="closeModal('newOrderModal')">×</button>
+            </div>
+            <form method="post" action="/Order/Create">
+                @Html.AntiForgeryToken()
+                <div class="modal-grid">
+                    <div class="mfg"><label>@Tr("auto_id")</label><input type="text" value="@nextId" readonly /></div>
+                    <div class="mfg"><label>@Tr("customer_name")</label><input name="customerName" type="text" required /></div>
+                    <div class="mfg"><label>@Tr("email")</label><input name="email" type="email" /></div>
+                    <div class="mfg"><label>@Tr("product")</label>
+                        <select name="productId">
+                            <option value="">@Tr("select_product")</option>
+                            @foreach (var p in products) { <option value="@p.ProductId">@p.ProductId – @p.Name</option> }
+                        </select>
+                    </div>
+                    <div class="mfg"><label>@Tr("quantity")</label><input name="quantity" type="number" min="1" required /></div>
+                    <div class="mfg"><label>@Tr("unit_price")</label><input name="unitPrice" type="number" min="0" step="0.01" /></div>
+                    <div class="mfg"><label>@Tr("due_date")</label><input name="dueDate" type="date" required /></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('newOrderModal')">@Tr("cancel")</button>
+                    <button type="submit" class="btn-action">@Tr("create_order")</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
 
 <script>
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-    function openDetailsModal(id, cust, email, pName, pId, qty, up, total, due, status, prog) {
-        document.getElementById('vdTitle').textContent = 'Order Details: ' + id;
-        document.getElementById('vdCust').textContent = cust;
-        document.getElementById('vdEmail').textContent = email;
-        document.getElementById('vdProduct').textContent = pName + ' (' + pId + ')';
-        document.getElementById('vdQty').textContent = qty;
-        document.getElementById('vdUp').textContent = '₹' + up.toLocaleString('en-IN');
-        document.getElementById('vdTotal').textContent = '₹' + total.toLocaleString('en-IN');
-        document.getElementById('vdDue').textContent = due;
-        document.getElementById('vdStatus').textContent = status;
-        document.getElementById('vdProg').textContent = prog;
-        openModal('orderDetailsModal');
-    }
-
-    function openEditModal(id, cust, email, pId, pName, qty, up, total, due, status) {
-        document.getElementById('eoCust').value = cust;
-        document.getElementById('eoEmail').value = email;
-        document.getElementById('eoPid').value = pId;
-        document.getElementById('eoPname').value = pName;
-        document.getElementById('eoQty').value = qty;
-        document.getElementById('eoUp').value = up;
-        document.getElementById('eoTotal').value = total.toLocaleString('en-IN');
-        document.getElementById('eoDue').value = due;
-        document.getElementById('eoStatus').value = status;
-        openModal('editOrderModal');
-    }
-
-    function calcEditOrderTotal() {
-        const q = parseFloat(document.getElementById('eoQty').value) || 0;
-        const u = parseFloat(document.getElementById('eoUp').value) || 0;
-        document.getElementById('eoTotal').value = (q * u).toLocaleString('en-IN');
-    }
-
     document.querySelectorAll('.modal-overlay').forEach(el => {
         el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
     });
-    function filterOrders() {
-        const q = document.getElementById('orderSearch').value.toLowerCase();
-        document.querySelectorAll('#orderTable tbody tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-        });
+    function openViewModal(id, cust, email, prod, prodId, qty, price, total, due, status) {
+        document.getElementById('vmTitle').textContent = '@Tr("order_details"): ' + id;
+        document.getElementById('vmBody').innerHTML =
+            '<div class="vl">@Tr("order_id")</div><div class="vv">' + id + '</div>' +
+            '<div class="vl">@Tr("customer")</div><div class="vv">' + cust + '</div>' +
+            '<div class="vl">@Tr("email")</div><div class="vv">' + (email || '—') + '</div>' +
+            '<div class="vl">@Tr("product")</div><div class="vv">' + (prod || '—') + ' (' + (prodId || '') + ')</div>' +
+            '<div class="vl">@Tr("quantity")</div><div class="vv">' + qty + '</div>' +
+            '<div class="vl">@Tr("unit_price")</div><div class="vv">₹' + price + '</div>' +
+            '<div class="vl">@Tr("total_amount")</div><div class="vv">₹' + total + '</div>' +
+            '<div class="vl">@Tr("due_date")</div><div class="vv">' + due + '</div>' +
+            '<div class="vl">@Tr("status")</div><div class="vv">' + status + '</div>';
+        openModal('viewModal');
     }
-
-    function filterStatus(status, el) {
-        // Update active tab
-        document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        // Filter rows
-        document.querySelectorAll('#orderTable tbody tr').forEach(row => {
-            row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
-        });
-        return false;
+    function openEditModal(id, cust, email, prodId, qty, price, due, status, c, f, g, p) {
+        document.getElementById('eoTitle').textContent = '@Tr("edit_order"): ' + id;
+        document.getElementById('editOrderForm').action = '/Order/Edit/' + id;
+        document.getElementById('eoCustomer').value = cust;
+        document.getElementById('eoEmail').value = email;
+        document.getElementById('eoProduct').value = prodId;
+        document.getElementById('eoQty').value = qty;
+        document.getElementById('eoPrice').value = price;
+        document.getElementById('eoDue').value = due;
+        document.getElementById('eoStatus').value = status;
+        document.getElementById('eoC').checked = c === 'true';
+        document.getElementById('eoF').checked = f === 'true';
+        document.getElementById('eoG').checked = g === 'true';
+        document.getElementById('eoP').checked = p === 'true';
+        openModal('editOrderModal');
     }
 </script>
